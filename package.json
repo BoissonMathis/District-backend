@@ -1,0 +1,31 @@
+{
+  "name": "district-backend",
+  "version": "1.0.0",
+  "description": "backend de mon projet cda 2024",
+  "main": "index.js",
+  "scripts": {
+    "test": "mocha tests/index.js --timeout 5000 -s 0 --exit"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "async": "^3.2.5",
+    "bcrypt": "^5.1.1",
+    "body-parser": "^1.20.2",
+    "chai": "^4.3.6",
+    "chai-http": "^4.3.0",
+    "express": "^4.19.2",
+    "express-session": "^1.18.0",
+    "jsonwebtoken": "^9.0.2",
+    "lodash": "^4.17.21",
+    "mocha": "^10.4.0",
+    "mongoose": "^8.4.1",
+    "passport": "^0.7.0",
+    "passport-jwt": "^4.0.1",
+    "passport-local": "^1.0.0",
+    "pino": "^9.2.0",
+    "pino-http": "^10.2.0",
+    "pino-pretty": "^11.2.1"
+  }
+}
