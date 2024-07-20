@@ -1,37 +1,58 @@
-const express = require('express')
-const _ = require('lodash')
+const express = require('express')              
+const _ = require("lodash")
 const bodyParser = require('body-parser')
-const Config = require('./config')
+const Config = require ('./config')
 const Logger = require('./utils/logger').pino
 
-// création de l'appli express
+// Création de notre application express.js
 const app = express()
 
-//démmarrage de la database
-require('./utils/database');
+// Démarrage de la database
+require('./utils/database')
 
-// déclaration des controller pour utilisateur
+// Ajout du module de login
+const passport = require('./utils/passport')
+// passport init
+
+var session = require('express-session')
+
+app.use(session({
+    secret: Config.secret_cookie,
+    resave: false,
+    saveUninitialized: true,
+    cookie: { secure: true }
+}))
+
+app.use(passport.initialize())
+app.use(passport.session())
+
+// Déclaration des controllers pour l'utilisateur
 const UserController = require('./controllers/UserController')
 
 // Déclaration des middlewares
 const DatabaseMiddleware = require('./middlewares/database')
 const LoggerMiddleware = require('./middlewares/logger')
 
-//déclaration des middlewareà express
+// Déclaration des middlewares à express
 app.use(bodyParser.json(), LoggerMiddleware.addLogger)
 
-// création des routes
+/*--------------------- Création des routes (User - Utilisateur) ---------------------*/
+app.post('/login', DatabaseMiddleware.checkConnexion, UserController.loginUser)
+
 // Création du endpoint /user pour l'ajout d'un utilisateur
 app.post('/user', DatabaseMiddleware.checkConnexion, UserController.addOneUser)
 
-// Création du endpoint /users pour l'ajout de plusieurs utilisateurs
+// Création du endpoint /user pour l'ajout de plusieurs utilisateurs
 app.post('/users', DatabaseMiddleware.checkConnexion, UserController.addManyUsers)
 
-// Création du endpoint /user pour delete un utilisateur
-app.delete('/user/:id', DatabaseMiddleware.checkConnexion, UserController.deleteOneUser)
+// Création du endpoint /user pour la récupération d'un utilisateur via l'id
+app.get('/user/:id', DatabaseMiddleware.checkConnexion, passport.authenticate('jwt', { session: false }), UserController.findOneUserById)
 
-// Création du endpoint /user pour delete un utilisateur
-app.delete('/users', DatabaseMiddleware.checkConnexion, UserController.deleteManyUsers)
+// Création du endpoint /user pour la suppression d'un utilisateur
+app.delete('/user/:id', DatabaseMiddleware.checkConnexion, passport.authenticate('jwt', { session: false }), UserController.deleteOneUser)
+
+// Création du endpoint /user pour la suppression de plusieurs utilisateurs
+app.delete('/users', DatabaseMiddleware.checkConnexion, passport.authenticate('jwt', { session: false }), UserController.deleteManyUsers)
 
 // démarrage du serveur au port définit
 app.listen(Config.port, () => {

@@ -14,8 +14,7 @@ describe("addOneUser", () => {
             password: "frank",
             status: "educator"
         }
-        UserService.addOneUser(user, function (err, value) {
-            // console.log(value)
+        UserService.addOneUser(user, null, function (err, value) {
             expect(value).to.be.a('object');
             expect(value).to.haveOwnProperty('_id')
             expect(value).to.haveOwnProperty('username')
@@ -30,7 +29,7 @@ describe("addOneUser", () => {
             password: "frank",
             status: "club"
         }
-        UserService.addOneUser(user_no_valid, function (err, value) {
+        UserService.addOneUser(user_no_valid, null, function (err, value) {
             expect(err).to.haveOwnProperty('msg')
             expect(err).to.haveOwnProperty('fields_with_error').with.lengthOf(1)
             expect(err).to.haveOwnProperty('fields')
@@ -45,7 +44,7 @@ describe("addOneUser", () => {
             password: "frank",
             status: "club"
         }
-        UserService.addOneUser(user_no_valid, function (err, value) {
+        UserService.addOneUser(user_no_valid, null, function (err, value) {
             expect(err).to.haveOwnProperty('msg')
             expect(err).to.haveOwnProperty('fields_with_error').with.lengthOf(1)
             expect(err).to.haveOwnProperty('field')
@@ -56,6 +55,27 @@ describe("addOneUser", () => {
 })
 
 describe("addManyUsers", () => {
+    it("Utilisateurs à ajouter, non valide. - E", (done) => {
+        var users_tab_error = [{
+            username: "Frank",
+            email: "Mikel@gmail.com",
+            password: "mikel",
+            status: "educator"
+        },{
+            username: "Thierry",
+            email: "Thierry@gmail.com",
+            password: "thierry"
+        },{
+            username: "",
+            email: "Pep@gmail.com",
+            password: "pep",
+            status: "joueur"
+        }]
+
+        UserService.addManyUsers(users_tab_error, null, function (err, value) {
+            done()
+        })
+    })
     it("Utilisateurs à ajouter, valide. - S", (done) => {
         var users_tab = [{
             username: "Mikel",
@@ -74,31 +94,10 @@ describe("addManyUsers", () => {
             status: "joueur"
         }]
 
-        UserService.addManyUsers(users_tab, function (err, value) {
+        UserService.addManyUsers(users_tab, null, function (err, value) {
             tab_id_users = _.map(value, '_id')
             users = [...value, ...users]
             expect(value).lengthOf(3)
-            done()
-        })
-    })
-    it("Utilisateurs à ajouter, non valide. - E", (done) => {
-        let users_tab_error = [{
-            username: "Mike",
-            email: "Mike@gmail.com",
-            password: "mikel" //champ status manquant
-        },{
-            username: "Thiery",
-            email: "Thiery@gmail.com",
-            password: "", //champ vide
-            status: "coach"
-        },{
-            username: "Pep", //duplicate
-            email: "Pepe@gmail.com",
-            password: "pep",
-            status: "joueur"
-        }]
-
-        UserService.addManyUsers(users_tab_error, function (err, value) {
             done()
         })
     })
@@ -106,7 +105,7 @@ describe("addManyUsers", () => {
 
 describe("deleteOneUser", () => {
     it("Supprimer un utilisateur correct. - S", (done) => {
-        UserService.deleteOneUser(id_user_valid, function (err, value) { //callback
+        UserService.deleteOneUser(id_user_valid, null, function (err, value) { //callback
             expect(value).to.be.a('object')
             expect(value).to.haveOwnProperty('_id')
             expect(value).to.haveOwnProperty('username')
@@ -115,7 +114,7 @@ describe("deleteOneUser", () => {
         })
     })
     it("Supprimer un utilisateur avec id incorrect. - E", (done) => {
-        UserService.deleteOneUser("1200", function (err, value) {
+        UserService.deleteOneUser("1200", null, function (err, value) {
             expect(err).to.be.a('object')
             expect(err).to.haveOwnProperty('msg')
             expect(err).to.haveOwnProperty('type_error')
@@ -124,7 +123,7 @@ describe("deleteOneUser", () => {
         })
     })
     it("Supprimer un utilisateur avec un id inexistant. - E", (done) => {
-        UserService.deleteOneUser("665f00c6f64f76ba59361e9f", function (err, value) {
+        UserService.deleteOneUser("665f00c6f64f76ba59361e9f", null, function (err, value) {
             expect(err).to.be.a('object')
             expect(err).to.haveOwnProperty('msg')
             expect(err).to.haveOwnProperty('type_error')
@@ -136,7 +135,7 @@ describe("deleteOneUser", () => {
 
 describe("deleteManyUsers", () => {
     it("Supprimer plusieurs utilisateurs correctement. - S", (done) => {
-        UserService.deleteManyUsers(tab_id_users, function (err, value) {
+        UserService.deleteManyUsers(tab_id_users, null, function (err, value) {
             expect(value).to.be.a('object')
             expect(value).to.haveOwnProperty('deletedCount')
             expect(value['deletedCount']).is.equal(tab_id_users.length)
@@ -144,7 +143,7 @@ describe("deleteManyUsers", () => {
         })
     })
     it("Supprimer plusieurs utilisateurs avec id incorrect. - E", (done) => {
-        UserService.deleteManyUsers("1200", function (err, value) {
+        UserService.deleteManyUsers("1200", null, function (err, value) {
             expect(err).to.be.a('object')
             expect(err).to.haveOwnProperty('msg')
             expect(err).to.haveOwnProperty('type_error')
