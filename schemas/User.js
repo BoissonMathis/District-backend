@@ -1,11 +1,5 @@
 const mongoose = require('mongoose')
 
-const format =  {
-    weekday: 'long',
-    month: 'long',
-    day: '2-digit',
-}
-
 var UserSchema = mongoose.Schema({
     username: {
         type: String,
@@ -43,7 +37,7 @@ var UserSchema = mongoose.Schema({
     }],
     created_at: {
         type: String,
-        default: new Date().toLocaleString('fr-FR').split(" ").join("-")
+        default: new Date()
     },
     token: String
 })

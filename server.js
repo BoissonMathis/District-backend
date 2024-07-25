@@ -10,6 +10,12 @@ const app = express()
 // Démarrage de la database
 require('./utils/database')
 
+const cors = require('cors')
+const corsOptions = {
+    origin: 'http://localhost:3001'
+}
+app.use(cors(corsOptions))
+
 // Ajout du module de login
 const passport = require('./utils/passport')
 // passport init
@@ -45,8 +51,23 @@ app.post('/user', DatabaseMiddleware.checkConnexion, UserController.addOneUser)
 // Création du endpoint /user pour l'ajout de plusieurs utilisateurs
 app.post('/users', DatabaseMiddleware.checkConnexion, UserController.addManyUsers)
 
+// Création du endpoint /user pour la récupération d'un utilisateur par le champ selectionné
+app.get('/user', DatabaseMiddleware.checkConnexion, passport.authenticate('jwt', { session: false }), UserController.findOneUser)
+
 // Création du endpoint /user pour la récupération d'un utilisateur via l'id
 app.get('/user/:id', DatabaseMiddleware.checkConnexion, passport.authenticate('jwt', { session: false }), UserController.findOneUserById)
+
+// Création du endpoint /user pour la récupération de plusieurs utilisateurs via l'idS
+app.get('/users', DatabaseMiddleware.checkConnexion, passport.authenticate('jwt', { session: false }), UserController.findManyUsersById)
+
+// Création du endpoint /users_by_filters pour la récupération de plusieurs utilisateurs
+app.get('/users_by_filters', DatabaseMiddleware.checkConnexion, passport.authenticate('jwt', { session: false }), UserController.findManyUsers)
+
+// Création du endpoint /user pour la modification d'un utilisateur
+app.put('/user/:id', DatabaseMiddleware.checkConnexion, passport.authenticate('jwt', { session: false }), UserController.updateOneUser)
+
+// Création du endpoint /user pour la modification de plusieurs utilisateurs
+app.put('/users', DatabaseMiddleware.checkConnexion, passport.authenticate('jwt', { session: false }), UserController.updateManyUsers)
 
 // Création du endpoint /user pour la suppression d'un utilisateur
 app.delete('/user/:id', DatabaseMiddleware.checkConnexion, passport.authenticate('jwt', { session: false }), UserController.deleteOneUser)
