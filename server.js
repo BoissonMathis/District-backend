@@ -34,6 +34,7 @@ app.use(passport.session())
 
 // Déclaration des controllers pour l'utilisateur
 const UserController = require('./controllers/UserController')
+const PostController = require('./controllers/PostController')
 
 // Déclaration des middlewares
 const DatabaseMiddleware = require('./middlewares/database')
@@ -74,6 +75,27 @@ app.delete('/user/:id', DatabaseMiddleware.checkConnexion, passport.authenticate
 
 // Création du endpoint /user pour la suppression de plusieurs utilisateurs
 app.delete('/users', DatabaseMiddleware.checkConnexion, passport.authenticate('jwt', { session: false }), UserController.deleteManyUsers)
+
+/*--------------------- Création des routes (Post - posts) ---------------------*/
+app.post('/post', DatabaseMiddleware.checkConnexion, passport.authenticate('jwt', { session: false }), PostController.addOnePost)
+
+app.post('/posts', DatabaseMiddleware.checkConnexion, passport.authenticate('jwt', { session: false }), PostController.addManyPosts)
+
+app.get('/post/:id', DatabaseMiddleware.checkConnexion, passport.authenticate('jwt', { session: false }), PostController.findOnePostById)
+
+app.get('/posts', DatabaseMiddleware.checkConnexion, passport.authenticate('jwt', { session: false }), PostController.findManyPostsById)
+
+app.get('/post', DatabaseMiddleware.checkConnexion, passport.authenticate('jwt', { session: false }), PostController.findOnePost)
+
+app.get('/posts_by_filters', DatabaseMiddleware.checkConnexion, passport.authenticate('jwt', { session: false }), PostController.findManyPosts)
+
+app.put('/post/:id', DatabaseMiddleware.checkConnexion, passport.authenticate('jwt', { session: false }), PostController.updateOnePost)
+
+app.put('/posts', DatabaseMiddleware.checkConnexion, passport.authenticate('jwt', { session: false }), PostController.updateManyPosts)
+
+app.delete('/post/:id', DatabaseMiddleware.checkConnexion, passport.authenticate('jwt', { session: false }), PostController.deleteOnePost)
+
+app.delete('/posts', DatabaseMiddleware.checkConnexion, passport.authenticate('jwt', { session: false }), PostController.deleteManyPosts)
 
 // démarrage du serveur au port définit
 app.listen(Config.port, () => {
