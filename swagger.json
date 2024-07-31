@@ -1,0 +1,182 @@
+{
+  "swaggerDefinition": {
+    "openapi": "3.0.0",
+    "info": {
+      "title": "District -- API",
+      "version": "1.0.0",
+      "description": "API documentation"
+    },
+    "servers": [
+      {
+        "url": "http://localhost:3002",
+        "description": "Development server"
+      }
+    ],
+    "components": {
+      "securitySchemes": {
+        "bearerAuth": {
+          "type": "http",
+          "scheme": "bearer",
+          "bearerFormat": "JWT"
+        }
+      },
+      "schemas": {
+        "User": {
+          "type": "object",
+          "required": [
+            "username",
+            "email",
+            "password",
+            "status",
+            "created_by",
+            "created_at"
+          ],
+          "properties": {
+            "username": {
+              "type": "string",
+              "description": "The user's username",
+              "example": "John"
+            },
+            "email": {
+              "type": "string",
+              "description": "The user's email",
+              "example": "John@gmail.com"
+            },
+            "password": {
+              "type": "string",
+              "description": "The user's password",
+              "example": "johnsecuredpassword1234"
+            },
+            "status": {
+              "type": "string",
+              "description": "The user's status",
+              "example": "joueur"
+            },
+            "bio": {
+              "type": "string",
+              "description": "The user's biography",
+              "example": "Je suis un joueur de foot"
+            },
+            "profil_image": {
+              "type": "string",
+              "description": "The user's profile image",
+              "example": ""
+            },
+            "banner_image": {
+              "type": "string",
+              "description": "The user's banner image",
+              "example": ""
+            },
+            "follows": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "description": "The IDs array of user's follows",
+              "example": [
+                "6696711304c71eaa5de75189",
+                "6696711304c71eaa5de75187"
+              ]
+            },
+            "created_by": {
+              "type": "string",
+              "description": "The ID of user's creator",
+              "example": "6696711304c71eaa5de75189"
+            },
+            "created_at": {
+              "type": "string",
+              "description": "The date of user's creation",
+              "example": "Mon Jul 29 2024 15:15:13 GMT+0200 (heure d’été d’Europe centrale)"
+            },
+            "updated_at": {
+              "type": "string",
+              "description": "The date of last user's update",
+              "example": "Mon Jul 30 2024 17:8:10 GMT+0200 (heure d’été d’Europe centrale)"
+            },
+            "token": {
+              "type": "string",
+              "description": "An optional token for the user"
+            }
+          }
+        }
+      },
+      "responses": {
+        "NotFound": {
+          "description": "Resource not found",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "type_error": {
+                    "type": "string",
+                    "example": "no-found"
+                  },
+                  "message": {
+                    "type": "string",
+                    "example": "Resource not found"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "ValidationError": {
+          "description": "Validation error",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "type_error": {
+                    "type": "string",
+                    "example": "validator"
+                  },
+                  "message": {
+                    "type": "string",
+                    "example": "Validation error"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "DuplicateError": {
+          "description": "Duplicate entry",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "type_error": {
+                    "type": "string",
+                    "example": "duplicate"
+                  },
+                  "message": {
+                    "type": "string",
+                    "example": "Duplicate entry"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "tags": [
+      {
+        "name": "User",
+        "description": "Operations about user"
+      },
+      {
+        "name": "Login",
+        "description": "Operations about authentication"
+      },
+      {
+        "name": "Logout",
+        "description": "Operations about deconnection"
+      }
+    ]
+  },
+  "apis": ["./controllers/*.js"]
+}

@@ -35,10 +35,19 @@ var UserSchema = mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Users'
     }],
+    created_by: {
+        type: String,
+        required: true,
+        default: function() {
+            return this._id ? this._id.toString() : null;
+        }
+    },
     created_at: {
         type: String,
+        required: true,
         default: new Date()
     },
+    updated_at: String,
     token: String
 })
 

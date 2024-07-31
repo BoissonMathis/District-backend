@@ -3,9 +3,17 @@ const _ = require("lodash")
 const bodyParser = require('body-parser')
 const Config = require ('./config')
 const Logger = require('./utils/logger').pino
+const swaggerJsdoc = require('swagger-jsdoc');
+const swaggerUi = require('swagger-ui-express');
 
 // Création de notre application express.js
 const app = express()
+
+// Configuration Swagger
+const swaggerOptions = require('./swagger.json');
+const swaggerDocs = swaggerJsdoc(swaggerOptions);
+app.use('/api-docs', swaggerUi.serve,
+swaggerUi.setup(swaggerDocs)); 
 
 // Démarrage de la database
 require('./utils/database')
@@ -35,6 +43,8 @@ app.use(passport.session())
 // Déclaration des controllers pour l'utilisateur
 const UserController = require('./controllers/UserController')
 const PostController = require('./controllers/PostController')
+const CommentController = require ('./controllers/CommentController')
+// const EventController = require ('./controllers/EventController')
 
 // Déclaration des middlewares
 const DatabaseMiddleware = require('./middlewares/database')
@@ -45,6 +55,8 @@ app.use(bodyParser.json(), LoggerMiddleware.addLogger)
 
 /*--------------------- Création des routes (User - Utilisateur) ---------------------*/
 app.post('/login', DatabaseMiddleware.checkConnexion, UserController.loginUser)
+
+app.post('/logout/:id', DatabaseMiddleware.checkConnexion, UserController.logoutUser)
 
 // Création du endpoint /user pour l'ajout d'un utilisateur
 app.post('/user', DatabaseMiddleware.checkConnexion, UserController.addOneUser)
@@ -96,6 +108,49 @@ app.put('/posts', DatabaseMiddleware.checkConnexion, passport.authenticate('jwt'
 app.delete('/post/:id', DatabaseMiddleware.checkConnexion, passport.authenticate('jwt', { session: false }), PostController.deleteOnePost)
 
 app.delete('/posts', DatabaseMiddleware.checkConnexion, passport.authenticate('jwt', { session: false }), PostController.deleteManyPosts)
+
+/*--------------------- Création des routes (Comment - comments) ---------------------*/
+app.post('/comment', DatabaseMiddleware.checkConnexion, passport.authenticate('jwt', { session: false }), CommentController.addOneComment)
+
+app.post('/comments', DatabaseMiddleware.checkConnexion, passport.authenticate('jwt', { session: false }), CommentController.addManyComments)
+
+app.get('/comment/:id', DatabaseMiddleware.checkConnexion, passport.authenticate('jwt', { session: false }), CommentController.findOneCommentById)
+
+app.get('/comments', DatabaseMiddleware.checkConnexion, passport.authenticate('jwt', { session: false }), CommentController.findManyCommentsById)
+
+app.get('/comment', DatabaseMiddleware.checkConnexion, passport.authenticate('jwt', { session: false }), CommentController.findOneComment)
+
+app.get('/comments_by_filters', DatabaseMiddleware.checkConnexion, passport.authenticate('jwt', { session: false }), CommentController.findManyComments)
+
+app.put('/comment/:id', DatabaseMiddleware.checkConnexion, passport.authenticate('jwt', { session: false }), CommentController.updateOneComment)
+
+app.put('/comments', DatabaseMiddleware.checkConnexion, passport.authenticate('jwt', { session: false }), CommentController.updateManyComments)
+
+app.delete('/comment/:id', DatabaseMiddleware.checkConnexion, passport.authenticate('jwt', { session: false }), CommentController.deleteOneComment)
+
+app.delete('/comments', DatabaseMiddleware.checkConnexion, passport.authenticate('jwt', { session: false }), CommentController.deleteManyComments)
+
+
+/*--------------------- Création des routes (Event - events) ---------------------*/
+// app.post('/event', DatabaseMiddleware.checkConnexion, passport.authenticate('jwt', { session: false }), EventController.addOneEvent)
+
+// app.post('/events', DatabaseMiddleware.checkConnexion, passport.authenticate('jwt', { session: false }), EventController.addManyEvents)
+
+// app.get('/event/:id', DatabaseMiddleware.checkConnexion, passport.authenticate('jwt', { session: false }), EventController.findOneEventById)
+
+// app.get('/events', DatabaseMiddleware.checkConnexion, passport.authenticate('jwt', { session: false }), EventController.findManyEventsById)
+
+// app.get('/event', DatabaseMiddleware.checkConnexion, passport.authenticate('jwt', { session: false }), EventController.findOneEvent)
+
+// app.get('/events_by_filters', DatabaseMiddleware.checkConnexion, passport.authenticate('jwt', { session: false }), EventController.findManyEvents)
+
+// app.put('/event/:id', DatabaseMiddleware.checkConnexion, passport.authenticate('jwt', { session: false }), EventController.updateOneEvent)
+
+// app.put('/events', DatabaseMiddleware.checkConnexion, passport.authenticate('jwt', { session: false }), EventController.updateManyEvents)
+
+// app.delete('/event/:id', DatabaseMiddleware.checkConnexion, passport.authenticate('jwt', { session: false }), EventController.deleteOneEvent)
+
+// app.delete('/events', DatabaseMiddleware.checkConnexion, passport.authenticate('jwt', { session: false }), EventController.deleteManyEvents)
 
 // démarrage du serveur au port définit
 app.listen(Config.port, () => {

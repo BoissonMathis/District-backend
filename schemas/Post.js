@@ -23,7 +23,19 @@ var PostSchema = mongoose.Schema({
     comments: [{
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Comments'
-    }]
+    }],
+    created_by: {
+        type: String,
+        required: true,
+        default: function() {
+            return this._id ? this._id.toString() : null;
+        }
+    },
+    created_at: {
+        type: String,
+        default: new Date()
+    },
+    updated_at: String,
 })
 
 module.exports = PostSchema

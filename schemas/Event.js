@@ -1,24 +1,28 @@
 const mongoose = require('mongoose')
 
-var CommentSchema = mongoose.Schema({
+var EventSchema = mongoose.Schema({
     user: {
         type: mongoose.Schema.Types.ObjectId,
         required: true
     },
-    contentText: {
+    type: {
         type: String,
         required: true
     },
-    contentImage: {
-        type: String
+    date: {
+        type: String,
+        required: true
     },
-    like: [{
+    categorie: [{
+        type: String,
+    }],
+    contentText: [{
+        type: String,
+    }],
+    place: String,
+    candidate: [{
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Users'
-    }],
-    response: [{
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'Comments'
     }],
     created_by: {
         type: String,
@@ -34,4 +38,4 @@ var CommentSchema = mongoose.Schema({
     updated_at: String
 })
 
-module.exports = CommentSchema
+module.exports = EventSchema

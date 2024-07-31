@@ -198,31 +198,35 @@ module.exports.findOnePost = function (tab_field, value, options, callback) {
     }
 }
 
-module.exports.findManyPosts = function(search, limit, page, options, callback) {
-    let populate = options && options.populate ? ['user'] : []
-    page = !page ? 1 : parseInt(page)
-    limit = !limit ? 10 : parseInt(limit)
-    console.log(search)
+module.exports.findManyPosts = function(search, field, limit, page, options, callback) {
+    let populate = options && options.populate ? ['user'] : [];
+    page = !page ? 1 : parseInt(page);
+    limit = !limit ? 10 : parseInt(limit);
 
     if (typeof page !== "number" || typeof limit !== "number" || isNaN(page) || isNaN(limit)) {
-        callback ({msg: `format de ${typeof page !== "number" ? "page" : "limit"} est incorrect`, type_error: "no-valid"})
-    }else{
-        let query_mongo = search ? {$or: _.map(["textContent"], (e) => {return {[e]: {$regex: search, $options: 'i'}}})} : {}
-        Post.countDocuments(query_mongo).then((value) => {
-            if (value > 0) {
-                const skip = ((page - 1) * limit)
-                Post.find(query_mongo, null, {skip:skip, limit:limit, populate: populate, lean: true}).then((results) => {
-                    callback(null, {
-                        count: value,
-                        results: results
+        callback({msg: `format de ${typeof page !== "number" ? "page" : "limit"} est incorrect`, type_error: "no-valid"});
+    } else {
+        let query_mongo = {};
+        if (search) {
+            query_mongo[field] = { $regex: search, $options: 'i' };
+        }
+        Post.countDocuments(query_mongo).then((count) => {
+            if (count > 0) {
+                const skip = (page - 1) * limit;
+                Post.find(query_mongo, null, {skip: skip, limit: limit, lean: true})
+                    .populate(populate)
+                    .then((results) => {
+                        callback(null, {count: count, results: results});
                     })
-                })
-            }else{
-                callback(null, {count: 0, results: []})
+                    .catch((err) => {
+                        callback(err);
+                    });
+            } else {
+                callback(null, {count: 0, results: []});
             }
-        }).catch((e) => {
-            callback(e)
-        })
+        }).catch((err) => {
+            callback(err);
+        });
     }
 }
 

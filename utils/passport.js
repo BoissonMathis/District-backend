@@ -11,8 +11,6 @@ passport.serializeUser((user, done) => done(null, user))
 passport.deserializeUser((user, done) => done(null, user))
 
 passport.use('login', new LocalStrategy({passReqToCallback: true}, function(req, username, password, done){
-    // création du systeme de login avec comparaison des mot de passe
-    // console.log(username, password)
     UserService.loginUser(username, password, null, done)
 }))
 
@@ -25,6 +23,9 @@ passport.use(new JWTStrategy({
     UserService.findOneUserById(jwt_payload._id, null, function(err, value){
         if(err){
             done(err)
+        }else if(value.token == ''){
+            done(null, false, {msg:"unauthorized", type_error:'no-valid'})
+            // done({msg:"unauthorized", type_error:'no-valid'})
         }else{
             done(null, value)
         }

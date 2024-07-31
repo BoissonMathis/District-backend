@@ -117,6 +117,36 @@ describe("POST - /login", () => {
     })
 })
 
+describe("POST - /logout", () => {
+    it("Déconnecter un utilisateur correct. - S", (done) => {
+        chai.request(server).post('/logout/'+users[0]._id)
+        .end((err, res) => {
+            res.should.have.status(200)
+            done()
+        })
+    })
+    it("Modifier un utilisateur sans etre authentifié. - E", (done) => {
+        chai.request(server).put('/user/' + users[0]._id).auth(valid_token, { type: 'bearer' }).send({ username: "Olivier" })
+        .end((err, res) => {
+            // console.log(err)
+            console.log(res)
+            // res.should.have.status(401)
+            done()
+        })
+    })
+})
+
+describe("POST - /login", () => {
+    it("Authentifier un utilisateur correct. - S", (done) => {
+        chai.request(server).post('/login').send({username: 'Lutfu', password: 'lutfu'})
+        .end((err, res) => {
+            res.should.have.status(200)
+            valid_token = res.body.token
+            done()
+        })
+    })
+})
+
 describe("GET - /user/:id", () => {
     it("Chercher un utilisateur correct. - S", (done) => {
         chai.request(server).get('/user/' + users[0]._id).auth(valid_token, { type: 'bearer' })
