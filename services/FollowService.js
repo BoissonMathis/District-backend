@@ -7,89 +7,70 @@ var User = mongoose.model("User", UserSchema);
 
 module.exports.follow = async function (user_id, follow_id, options, callback) {
   if (user_id && mongoose.isValidObjectId(user_id)) {
-    User.findById(user_id)
-      .then((value) => {
-        try {
-          if (value) {
-            let update = {};
-            update.follows = value.follows;
-            if (follow_id && mongoose.isValidObjectId(follow_id)) {
-              if (!value["follows"].includes(follow_id)) {
-                update.follows.push(follow_id);
-                update.updated_at = new Date();
-                User.findByIdAndUpdate(new ObjectId(user_id), update, {
-                  returnDocument: "after",
-                  runValidators: true,
-                })
-                  .then((value) => {
-                    try {
-                      if (value) callback(null, value.toObject());
-                      else
-                        callback({
-                          msg: "Utilisateur non trouvé.",
-                          type_error: "no-found",
-                        });
-                    } catch (e) {
-                      callback(e);
-                    }
-                  })
-                  .catch((errors) => {
-                    if (errors.code === 11000) {
-                      var field = Object.keys(errors.keyPattern)[0];
-                      const duplicateErrors = {
-                        msg: `Duplicate key error: ${field} must be unique.`,
-                        fields_with_error: [field],
-                        fields: { [field]: `The ${field} is already taken.` },
-                        type_error: "duplicate",
-                      };
-                      callback(duplicateErrors);
-                    } else {
-                      errors = errors["errors"];
-                      var text = Object.keys(errors)
-                        .map((e) => {
-                          return errors[e]["properties"]["message"];
-                        })
-                        .join(" ");
-                      var fields = _.transform(
-                        Object.keys(errors),
-                        function (result, value) {
-                          result[value] =
-                            errors[value]["properties"]["message"];
-                        },
-                        {}
-                      );
-                      var err = {
-                        msg: text,
-                        fields_with_error: Object.keys(errors),
-                        fields: fields,
-                        type_error: "validator",
-                      };
-                      callback(err);
-                    }
-                  });
-              } else {
-                callback({
-                  msg: "Utilisateur déja follow",
-                  type_error: "no-valid",
-                });
-              }
-            }
-          } else {
-            callback({
-              msg: "Aucun utilisateur trouvé.",
-              type_error: "no-found",
-            });
-          }
-        } catch (e) {
-          console.log(e);
-        }
-      })
-      .catch((err) => {
-        callback({
-          msg: "Impossible de chercher l'élément.",
-          type_error: "error-mongo",
+    try {
+      // Vérifier que l'utilisateur à suivre existe
+      const userToFollow = await User.findById(follow_id);
+      if (!userToFollow) {
+        return callback({
+          msg: "L'utilisateur à suivre n'existe pas.",
+          type_error: "no-found",
         });
-      });
+      }
+
+      const user = await User.findById(user_id);
+      if (user) {
+        if (user.follows && !user.follows.includes(follow_id)) {
+          user.follows.push(follow_id);
+          user.updated_at = new Date();
+
+          const updatedUser = await user.save();
+          callback(null, updatedUser.toObject());
+        } else {
+          callback({
+            msg: "Utilisateur déjà follow.",
+            type_error: "no-valid",
+          });
+        }
+      } else {
+        callback({
+          msg: "Aucun utilisateur trouvé.",
+          type_error: "no-found",
+        });
+      }
+    } catch (err) {
+      if (err.code === 11000) {
+        const field = Object.keys(err.keyPattern)[0];
+        const duplicateErrors = {
+          msg: `Duplicate key error: ${field} must be unique.`,
+          fields_with_error: [field],
+          fields: { [field]: `The ${field} is already taken.` },
+          type_error: "duplicate",
+        };
+        callback(duplicateErrors);
+      } else if (err.errors) {
+        const errors = err.errors;
+        const text = Object.keys(errors)
+          .map((e) => errors[e]["properties"]["message"])
+          .join(" ");
+        const fields = Object.keys(errors).reduce((result, value) => {
+          result[value] = errors[value]["properties"]["message"];
+          return result;
+        }, {});
+        const errResponse = {
+          msg: text,
+          fields_with_error: Object.keys(errors),
+          fields: fields,
+          type_error: "validator",
+        };
+        callback(errResponse);
+      } else {
+        callback({
+          msg: "Erreur lors de la mise à jour.",
+          type_error: "error-mongo",
+          error: err,
+        });
+      }
+    }
   } else {
     callback({ msg: "ObjectId non conforme.", type_error: "no-valid" });
   }
@@ -102,93 +83,70 @@ module.exports.unfollow = async function (
   callback
 ) {
   if (user_id && mongoose.isValidObjectId(user_id)) {
-    User.findById(user_id)
-      .then((value) => {
-        try {
-          if (value) {
-            let update = {};
-            update.follows = value.follows;
-
-            if (unfollow_id && mongoose.isValidObjectId(unfollow_id)) {
-              if (value["follows"].includes(unfollow_id)) {
-                update.follows = update.follows.filter(
-                  (id) => id.toString() !== unfollow_id.toString()
-                );
-                update.updated_at = new Date();
-                User.findByIdAndUpdate(
-                  new mongoose.Types.ObjectId(user_id),
-                  update,
-                  { returnDocument: "after", runValidators: true }
-                )
-                  .then((value) => {
-                    try {
-                      if (value) callback(null, value.toObject());
-                      else
-                        callback({
-                          msg: "Utilisateur non trouvé.",
-                          type_error: "no-found",
-                        });
-                    } catch (e) {
-                      callback(e);
-                    }
-                  })
-                  .catch((errors) => {
-                    if (errors.code === 11000) {
-                      var field = Object.keys(errors.keyPattern)[0];
-                      const duplicateErrors = {
-                        msg: `Duplicate key error: ${field} must be unique.`,
-                        fields_with_error: [field],
-                        fields: { [field]: `The ${field} is already taken.` },
-                        type_error: "duplicate",
-                      };
-                      callback(duplicateErrors);
-                    } else {
-                      errors = errors["errors"];
-                      var text = Object.keys(errors)
-                        .map((e) => {
-                          return errors[e]["properties"]["message"];
-                        })
-                        .join(" ");
-                      var fields = _.transform(
-                        Object.keys(errors),
-                        function (result, value) {
-                          result[value] =
-                            errors[value]["properties"]["message"];
-                        },
-                        {}
-                      );
-                      var err = {
-                        msg: text,
-                        fields_with_error: Object.keys(errors),
-                        fields: fields,
-                        type_error: "validator",
-                      };
-                      callback(err);
-                    }
-                  });
-              } else {
-                callback({
-                  msg: "L'utilisateur n'est pas follow.",
-                  type_error: "no-valid",
-                });
-              }
-            }
-          } else {
-            callback({
-              msg: "Aucun utilisateur trouvé.",
-              type_error: "no-found",
-            });
-          }
-        } catch (e) {
-          console.log(e);
-        }
-      })
-      .catch((err) => {
-        callback({
-          msg: "Impossible de chercher l'élément.",
-          type_error: "error-mongo",
+    try {
+      if (!mongoose.isValidObjectId(unfollow_id)) {
+        return callback({
+          msg: "L'ID de l'utilisateur à unfollow n'est pas valide.",
+          type_error: "no-valid",
         });
-      });
+      }
+
+      const user = await User.findById(user_id);
+      if (user) {
+        if (user.follows && user.follows.includes(unfollow_id)) {
+          user.follows = user.follows.filter(
+            (id) => id.toString() !== unfollow_id.toString()
+          );
+          user.updated_at = new Date();
+
+          const updatedUser = await user.save();
+          callback(null, updatedUser.toObject());
+        } else {
+          callback({
+            msg: "L'utilisateur n'est pas suivi.",
+            type_error: "no-valid",
+          });
+        }
+      } else {
+        callback({
+          msg: "Aucun utilisateur trouvé.",
+          type_error: "no-found",
+        });
+      }
+    } catch (err) {
+      if (err.code === 11000) {
+        const field = Object.keys(err.keyPattern)[0];
+        const duplicateErrors = {
+          msg: `Duplicate key error: ${field} must be unique.`,
+          fields_with_error: [field],
+          fields: { [field]: `The ${field} is already taken.` },
+          type_error: "duplicate",
+        };
+        callback(duplicateErrors);
+      } else if (err.errors) {
+        const errors = err.errors;
+        const text = Object.keys(errors)
+          .map((e) => errors[e]["properties"]["message"])
+          .join(" ");
+        const fields = Object.keys(errors).reduce((result, value) => {
+          result[value] = errors[value]["properties"]["message"];
+          return result;
+        }, {});
+        const errResponse = {
+          msg: text,
+          fields_with_error: Object.keys(errors),
+          fields: fields,
+          type_error: "validator",
+        };
+        callback(errResponse);
+      } else {
+        callback({
+          msg: "Erreur lors de la mise à jour.",
+          type_error: "error-mongo",
+          error: err,
+        });
+      }
+    }
   } else {
     callback({ msg: "ObjectId non conforme.", type_error: "no-valid" });
   }
