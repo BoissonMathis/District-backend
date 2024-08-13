@@ -58,7 +58,7 @@ module.exports.addOneComment = async function (comment, options, callback) {
             callback(err);
         }else {
             await new_comment.save();
-            new_comment.answer && opts.push('answer')
+            new_comment.answer && opts.populate.push('answer')
             Comment.findById(new_comment._id, null, opts).then((value) => {
                 try {
                     if (value) {
@@ -73,7 +73,6 @@ module.exports.addOneComment = async function (comment, options, callback) {
             }).catch((err) => {
                 callback({ msg: "Impossible de chercher l'élément.", type_error: "error-mongo" });
             });
-            // callback(null, new_comment.toObject());
         }
     }catch(error){
         if (error.code === 11000) { // Erreur de duplicité

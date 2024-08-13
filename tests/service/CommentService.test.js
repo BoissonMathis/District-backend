@@ -87,6 +87,7 @@ describe("addOneComment", () => {
             post: post_id,
             answer: id_comment_valid
         }
+        console.log(comment_valid)
         CommentService.addOneComment(comment_valid, null, function (err, value) {
             expect(value).to.be.a('object');
             expect(value).to.haveOwnProperty('_id')
@@ -241,7 +242,7 @@ describe("findOneCommentById", () => {
 describe("findManyCommentsById", () => {
     it("Chercher des commentaires existant correct. - S", (done) => {
         CommentService.findManyCommentsById(tab_id_comments, null, function (err, value) {
-            expect(value).lengthOf(4)
+            expect(value).to.have.lengthOf(4)
             done()
         })
     })
@@ -332,7 +333,6 @@ describe("findManyComments", () => {
             expect(value).to.haveOwnProperty("count")
             expect(value).to.haveOwnProperty("results")
             expect(err).to.be.null
-            console.log(value)
             done()
         })
     })
