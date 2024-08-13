@@ -1,4 +1,5 @@
 const UserService = require('../../services/UserService')
+const PostService = require('../../services/PostService')
 const chai = require('chai');
 const chaiHttp = require('chai-http');
 const expect = chai.expect;
@@ -8,6 +9,7 @@ const _ = require('lodash')
 var tab_id_users = []
 var comments = []
 var valid_token = ''
+var post_id = ''
 
 let users = [
     {
@@ -55,10 +57,25 @@ function rdm_user (tab) {
 
 chai.use(chaiHttp)
 
+describe("POST - /post", () => {
+    it("Création d'un post fictif", (done) => {
+        let post = {
+            user: rdm_user(tab_id_users),
+            contentText: 'Ceci est un post test'
+        }
+        PostService.addOnePost(post, null, function (err, value) {
+            expect(value).to.haveOwnProperty('_id')
+            post_id = value._id
+            done()
+        })
+    })
+})
+
 describe("POST - /comment", () => {
     it("Ajouter un commentaire. - S", (done) => {
         chai.request(server).post('/comment').auth(valid_token, { type: 'bearer' }).send({
             user: rdm_user(tab_id_users),
+            post: post_id,
             contentText: "Ceci est un commentaire"
         }).end((err, res) => {
             expect(res).to.have.status(201)
@@ -116,14 +133,17 @@ describe("POST - /comments", () => {
         chai.request(server).post('/comments').auth(valid_token, { type: 'bearer' }).send([
             {
                 user: rdm_user(tab_id_users),
+                post: post_id,
                 contentText: "Encore un commentaire footballistique"
             },
             {
                 user: rdm_user(tab_id_users),
+                post: post_id,
                 contentText: "Encore et toujour un commentaire footballistique"
             },
             {
                 user: rdm_user(tab_id_users),
+                post: post_id,
                 contentText: "Ho tiens, un commentaire qui parle de foot"
             },
         ]).end((err, res) => {
@@ -395,6 +415,15 @@ describe("DELETE - /comments", () => {
 describe("DELETE - /users", () => {
     it("Suppression des utilisateurs fictif", (done) => {
         UserService.deleteManyUsers(tab_id_users, null, function (err, value) {
+            done()
+        })
+    })
+})
+
+describe("DELETE - /post", () => {
+    it("Suppression du post fictif", (done) => {
+        PostService.deleteOnePost(post_id, null, function (err, value) {
+            expect(value).to.haveOwnProperty('_id')
             done()
         })
     })

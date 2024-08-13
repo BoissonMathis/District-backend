@@ -16,13 +16,13 @@ require('../utils/database');
 //     require('./controllers/PostController.test')
 // })
 
-describe("CommentService", () => {
-    require('./service/CommentService.test')
-})
-
-// describe("CommentController", () => {
-//     require('./controllers/CommentController.test')
+// describe("CommentService", () => {
+//     require('./service/CommentService.test')
 // })
+
+describe("CommentController", () => {
+    require('./controllers/CommentController.test')
+})
 
 // describe("EventService", () => {
 //     require('./service/EventService.test')
