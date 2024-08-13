@@ -87,7 +87,6 @@ describe("addOneComment", () => {
             post: post_id,
             answer: id_comment_valid
         }
-        console.log(comment_valid)
         CommentService.addOneComment(comment_valid, null, function (err, value) {
             expect(value).to.be.a('object');
             expect(value).to.haveOwnProperty('_id')

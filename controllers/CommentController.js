@@ -159,6 +159,7 @@ module.exports.updateOneComment = function(req, res) {
     let options = {user: req.user}
 
     CommentService.updateOneComment(req.params.id, update, options, function(err, value) {
+        // console.log(err, value)
         if (err && err.type_error == "no-found") {
             res.statusCode = 404
             res.send(err)

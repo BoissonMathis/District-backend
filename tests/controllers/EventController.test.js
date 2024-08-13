@@ -320,7 +320,6 @@ describe("findManyEvents", () => {
             expect(value["count"]).to.be.equal(1)
             expect(value["results"]).lengthOf(1)
             expect(err).to.be.null
-            console.log(value)
             done()
         })
     })

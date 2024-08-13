@@ -48,7 +48,7 @@ function rdm_user (tab) {
 // chai.use(chaiHttp)
 
 describe("addOneEvent", () => {
-    it("Event correct. - S", () => {
+    it("Event correct. - S", (done) => {
         let event_valid = {
             user: rdm_user(tab_id_users),
             type: "match",
@@ -73,7 +73,7 @@ describe("addOneEvent", () => {
             done()
         })
     })
-    it("Evenement incorrect. (sans user) - E", () => {
+    it("Evenement incorrect. (sans user) - E", (done) => {
         let event_without_user = {
             type: "match",
             date: "23 novembre 2024",
@@ -83,35 +83,37 @@ describe("addOneEvent", () => {
             place: "10 rue du faubourg, montbéliard"
         }
         EventService.addOneEvent(event_without_user, null, function (err, value) {
-            expect(value).to.be.a('object');
-            expect(value).to.haveOwnProperty('msg')
-            expect(value).to.haveOwnProperty('fields_with_error')
-            expect(value).to.haveOwnProperty('fields')
-            expect(value['fields']).to.haveOwnProperty('user')
-            expect(value).to.haveOwnProperty('type_error')
-            expect(value['msg']).to.equal('Veuillez renseigner un(e) user')
+            expect(err).to.be.a('object');
+            expect(err).to.haveOwnProperty('msg')
+            expect(err).to.haveOwnProperty('fields_with_error')
+            expect(err).to.haveOwnProperty('fields')
+            expect(err['fields']).to.haveOwnProperty('user')
+            expect(err).to.haveOwnProperty('type_error')
+            expect(err['msg']).to.equal('Veuillez renseigner un(e) user')
+            done()
         })
     })
-    it("Evenement incorrect. (sans contentText) - E", () => {
-        let event_without_type = {
+    it("Evenement incorrect. (sans contentText) - E", (done) => {
+        let event_without_contentText = {
             user: rdm_user(tab_id_users),
             date: "23 novembre 2024",
             categorie: "U8 - U9",
             level: "D1",
-            contentText: 'Ceci est un evenement test',
+            type: 'plateau',
             place: "10 rue du faubourg, montbéliard"
         }
-        EventService.addOneEvent(event_without_type, null, function (err, value) {
-            expect(value).to.be.a('object');
-            expect(value).to.haveOwnProperty('msg')
-            expect(value).to.haveOwnProperty('fields_with_error')
-            expect(value).to.haveOwnProperty('fields')
-            expect(value['fields']).to.haveOwnProperty('contentText')
-            expect(value).to.haveOwnProperty('type_error')
-            expect(value['msg']).to.equal('Veuillez renseigner un(e) contentText')
+        EventService.addOneEvent(event_without_contentText, null, function (err, value) {
+            expect(err).to.be.a('object');
+            expect(err).to.haveOwnProperty('msg')
+            expect(err).to.haveOwnProperty('fields_with_error')
+            expect(err).to.haveOwnProperty('fields')
+            expect(err['fields']).to.haveOwnProperty('contentText')
+            expect(err).to.haveOwnProperty('type_error')
+            expect(err['msg']).to.equal('Veuillez renseigner un(e) contentText')
+            done()
         })
     })
-    it("Evenement incorrect. (avec id incorrect dans user) - E", () => {
+    it("Evenement incorrect. (avec id incorrect dans user) - E", (done) => {
         let event_with_incorrect_id = {
             user: '741852963',
             type: "match",
@@ -122,11 +124,12 @@ describe("addOneEvent", () => {
             place: "10 rue du faubourg, montbéliard"
         }
         EventService.addOneEvent(event_with_incorrect_id, null, function (err, value) {
-            expect(value).to.be.a('object');
-            expect(value).to.haveOwnProperty('msg')
-            expect(value).to.haveOwnProperty('type_error')
-            expect(value['msg']).to.equal('Format de requete invalid')
-            expect(value['type_error']).to.equal('validator')
+            expect(err).to.be.a('object');
+            expect(err).to.haveOwnProperty('msg')
+            expect(err).to.haveOwnProperty('type_error')
+            expect(err['msg']).to.equal('Format de requete invalid')
+            expect(err['type_error']).to.equal('validator')
+            done()
         })
     })
 })
@@ -416,26 +419,27 @@ describe("updateManyEvents", () => {
 })
 
 describe("deleteOneEvent", () => {
-    it("Delete un evenement incorrectement. (id introuvable) - E", () => {
+    it("Delete un evenement incorrectement. (id introuvable) - E", (done) => {
         EventService.deleteOneEvent('66a2bfe9c6586ef77eef101c', null, function (err, value) {
             expect(err).to.be.a('object');
             expect(err).to.haveOwnProperty('msg')
             expect(err['msg']).to.equal('Evenement non trouvé.')
             expect(err).to.haveOwnProperty('type_error')
             expect(err['type_error']).to.equal('no-found')
+            done()
         })
     })
-    it("Delete un evenement incorrectement. (id no-valid) - E", () => {
+    it("Delete un evenement incorrectement. (id no-valid) - E", (done) => {
         EventService.deleteOneEvent('123456789', null, function (err, value) {
             expect(err).to.be.a('object');
             expect(err).to.haveOwnProperty('msg')
             expect(err['msg']).to.equal('Id invalide.')
             expect(err).to.haveOwnProperty('type_error')
             expect(err['type_error']).to.equal('no-valid')
-            
+            done()
         })
     })
-    it("Delete un evenement correctement. - S", () => {
+    it("Delete un evenement correctement. - S", (done) => {
         EventService.deleteOneEvent(id_event_valid, null, function (err, value) {
             expect(value).to.be.a('object');
             expect(value).to.haveOwnProperty('_id')
@@ -446,6 +450,7 @@ describe("deleteOneEvent", () => {
             expect(value).to.haveOwnProperty('level')
             expect(value).to.haveOwnProperty('categorie')
             expect(value).to.haveOwnProperty('place')
+            done()
         })
     })
 })
