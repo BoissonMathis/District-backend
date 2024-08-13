@@ -7,7 +7,7 @@ let tab_id_users = []
 let users = []
 
 describe("addOneUser", () => {
-    it("Utilisateur correct. - S", () => {
+    it("Utilisateur correct. - S", (done) => {
         let user = {
             username: "Frank",
             email: "Frank@gmail.com",
@@ -21,9 +21,10 @@ describe("addOneUser", () => {
             expect(value).to.haveOwnProperty('email')
             expect(value).to.haveOwnProperty('status')
             id_user_valid = value._id
+            done()
         })
     })
-    it("Utilisateur incorrect. (Sans username) - E", () => {
+    it("Utilisateur incorrect. (Sans username) - E", (done) => {
         let user_no_valid = {
             email: "Frank2@test.com",
             password: "frank",
@@ -35,9 +36,10 @@ describe("addOneUser", () => {
             expect(err).to.haveOwnProperty('fields')
             expect(err['fields']).to.haveOwnProperty('username')
             expect(err['fields']['username']).to.equal('Path `username` is required.')
+            done()
         })
     })
-    it("Utilisateur incorrect. (Username déja utilisé) - E", () => {
+    it("Utilisateur incorrect. (Username déja utilisé) - E", (done) => {
         let user_no_valid = {
             username: "Frank",
             email: "Frank2@test.com",
@@ -47,9 +49,10 @@ describe("addOneUser", () => {
         UserService.addOneUser(user_no_valid, null, function (err, value) {
             expect(err).to.haveOwnProperty('msg')
             expect(err).to.haveOwnProperty('fields_with_error').with.lengthOf(1)
-            expect(err).to.haveOwnProperty('field')
-            expect(err['field']).to.equal('username')
-            expect(err['msg']).to.equal('Path username value already exist.')
+            expect(err).to.haveOwnProperty('fields')
+            expect(err['fields']).to.haveOwnProperty('username')
+            expect(err['msg']).to.equal('Ce username exist déja.')
+            done()
         })
     })
 })
@@ -237,6 +240,31 @@ describe("updateManyUsers", () => {
     })
 })
 
+describe("loginUser", () => {
+    it("Connecter un utilisateur correctement. - S", (done) => {
+        UserService.loginUser('Jean', 'frank', null, function (err, value) {
+            expect(value).to.be.a('object')
+            expect(value).to.haveOwnProperty('_id')
+            expect(value).to.haveOwnProperty('username')
+            expect(value).to.haveOwnProperty('password')
+            expect(value).to.haveOwnProperty('token')
+            expect(value['username']).to.equal('Jean')
+            done()
+        })
+    })
+})
+
+describe("logoutUser", () => {
+    it("Déconecter un utilisateur correctement. - S", (done) => {
+        UserService.logoutUser(id_user_valid, null, function (err, value) {
+            expect(value).to.be.a('object')
+            expect(value).to.haveOwnProperty('token')
+            expect(value['token']).to.equal('')
+            done()
+        })
+    })
+})
+
 describe("deleteOneUser", () => {
     it("Supprimer un utilisateur correct. - S", (done) => {
         UserService.deleteOneUser(id_user_valid, null, function (err, value) { //callback
@@ -282,17 +310,6 @@ describe("deleteManyUsers", () => {
             expect(err).to.haveOwnProperty('msg')
             expect(err).to.haveOwnProperty('type_error')
             expect(err['type_error']).to.be.equal('no-valid')
-            done()
-        })
-    })
-})
-
-describe("logoutUser", () => {
-    it("Décconecter un utilisateur correctement. - S", (done) => {
-        UserService.deleteManyUsers(tab_id_users, null, function (err, value) {
-            expect(value).to.be.a('object')
-            expect(value).to.haveOwnProperty('deletedCount')
-            expect(value['deletedCount']).is.equal(tab_id_users.length)
             done()
         })
     })
