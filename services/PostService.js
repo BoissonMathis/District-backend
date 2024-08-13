@@ -2,19 +2,19 @@ const PostSchema = require('../schemas/Post')
 const _ = require('lodash')
 const mongoose = require('mongoose')
 const ObjectId = mongoose.Types.ObjectId
+const { Types } = mongoose;
 
 let Post = mongoose.model('Post', PostSchema)
 
 Post.createIndexes()
 
 module.exports.addOnePost = async function (post, options, callback) {
+    let opts = {populate: options && options.populate ? [{path: 'user', select: '-token -password'}] : []}
     try{
         var new_post = new Post(post);
         var errors = new_post.validateSync();
 
         if (errors) {
-            // console.log('mon erreur:', errors.errors)
-            // console.log('ma propriété path:', errors.errors.user.path)
             errors = errors['errors'];
             var path = Object.keys(errors).map((e) => {
                 return errors[e]['properties']['path'];
@@ -30,8 +30,21 @@ module.exports.addOnePost = async function (post, options, callback) {
             };
             callback(err);
         }else {
-            await new_post.save();
-            callback(null, new_post.toObject());
+            await new_post.save()
+            Post.findById(new_post._id, null, opts).then((value) => {
+                try {
+                    if (value) {
+                        callback(null, value.toObject());
+                    } else {
+                        callback({ msg: "Aucun post trouvé.", type_error: "no-found" });
+                    }
+                }
+                catch (e) {
+                    console.log(e)
+                }
+            }).catch((err) => {
+                callback({ msg: "Impossible de chercher l'élément.", type_error: "error-mongo" });
+            });
         }
     }catch(error){
         if (error.code === 11000) { // Erreur de duplicité
@@ -105,7 +118,7 @@ module.exports.addManyPosts = async function (posts, options, callback) {
 };
 
 module.exports.findOnePostById = function (post_id, options, callback) {
-    let opts = {populate: options && options.populate ? ["user_id"] : []}
+    let opts = {populate: options && options.populate ? [{path: 'user', select: '-token -password'}] : []}
 
     if (post_id && mongoose.isValidObjectId(post_id)) {
         Post.findById(post_id, null, opts).then((value) => {
@@ -128,7 +141,7 @@ module.exports.findOnePostById = function (post_id, options, callback) {
 }
 
 module.exports.findManyPostsById = function (posts_id, options, callback) {
-    let opts = {populate: (options && options.populate ? ['user_id'] : []), lean: true}
+    let opts = {populate: (options && options.populate ? [{path: 'user', select: '-token -password'}] : []), lean: true}
 
     if (posts_id && Array.isArray(posts_id) && posts_id.length > 0 && posts_id.filter((e) => { return mongoose.isValidObjectId(e) }).length == posts_id.length) {
         posts_id = posts_id.map((e) => { return new ObjectId(e) })
@@ -160,7 +173,7 @@ module.exports.findManyPostsById = function (posts_id, options, callback) {
 
 
 module.exports.findOnePost = function (tab_field, value, options, callback) {
-    let opts = {populate: options && options.populate ? ['user'] : []}
+    let opts = {populate: options && options.populate ? [{path: 'user', select: '-token -password'}] : []}
     var field_unique = ['contentText']
 
     if (tab_field && Array.isArray(tab_field) && value && _.filter(tab_field, (e) => { return field_unique.indexOf(e) == -1}).length == 0) {
@@ -199,7 +212,7 @@ module.exports.findOnePost = function (tab_field, value, options, callback) {
 }
 
 module.exports.findManyPosts = function(search, field, limit, page, options, callback) {
-    let populate = options && options.populate ? ['user'] : [];
+    let populate = options && options.populate ? [{path: 'user', select: '-token -password'}] : [];
     page = !page ? 1 : parseInt(page);
     limit = !limit ? 10 : parseInt(limit);
 
@@ -207,7 +220,13 @@ module.exports.findManyPosts = function(search, field, limit, page, options, cal
         callback({msg: `format de ${typeof page !== "number" ? "page" : "limit"} est incorrect`, type_error: "no-valid"});
     } else {
         let query_mongo = {};
-        if (search) {
+        if (search && field == 'user') {
+            if (Types.ObjectId.isValid(search)) {
+                query_mongo[field] = new Types.ObjectId(search);
+            } else {
+                callback({msg: "La valeur de recherche n'est pas un id valide", type_error: "no-valid"});
+            }
+        }else if(search && field !== 'user'){
             query_mongo[field] = { $regex: search, $options: 'i' };
         }
         Post.countDocuments(query_mongo).then((count) => {

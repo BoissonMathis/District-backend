@@ -3,7 +3,8 @@ const mongoose = require('mongoose')
 var PostSchema = mongoose.Schema({
     user: {
         type: mongoose.Schema.Types.ObjectId,
-        required: true
+        ref: "User",
+        required: true,
     },
     contentText: {
         type: String,
@@ -14,15 +15,11 @@ var PostSchema = mongoose.Schema({
     },
     like: [{
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'Users'
+        ref: 'User'
     }],
     repost: [{
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'Users'
-    }],
-    comments: [{
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'Comments'
+        ref: 'User'
     }],
     created_by: {
         type: String,

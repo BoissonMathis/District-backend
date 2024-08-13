@@ -25,7 +25,6 @@ passport.use(new JWTStrategy({
             done(err)
         }else if(value.token == ''){
             done(null, false, {msg:"unauthorized", type_error:'no-valid'})
-            // done({msg:"unauthorized", type_error:'no-valid'})
         }else{
             done(null, value)
         }

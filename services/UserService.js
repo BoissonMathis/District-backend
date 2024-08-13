@@ -4,12 +4,43 @@ const mongoose = require('mongoose')
 const ObjectId = mongoose.Types.ObjectId
 const bcrypt = require('bcrypt')
 const TokenUtils = require('./../utils/token')
+const cookieParser = require('cookie-parser');
 const SALT_WORK_FACTOR = 10
 
 var User = mongoose.model('User', UserSchema)
 
 User.createIndexes()
 
+// module.exports.loginUser = async function(username, password, options, callback) {
+//     if (username !== "" && password !== "") {
+//         module.exports.findOneUser(['username', 'email'], username, null, async (err, value) => {
+//             if (err) {
+//                 callback(err);
+//             } else if (!value) {
+//                 callback({ msg: "Utilisateur non trouvé.", type_error: "no-found" });
+//             } else {
+//                 if (bcrypt.compareSync(password, value.password)) {
+//                     var token = TokenUtils.createToken({ _id: value._id }, null)
+//                     User.findByIdAndUpdate(value._id, { token: token }, { returnDocument: 'after', runValidators: true })
+//                         .then((updatedUser) => {
+//                             if (updatedUser) {
+//                                 callback(null, updatedUser.toObject());
+//                             } else {
+//                                 callback({ msg: "Utilisateur non trouvé après mise à jour.", type_error: "no-found" });
+//                             }
+//                         })
+//                         .catch((updateErr) => {
+//                             callback(updateErr);
+//                         });
+//                 } else {
+//                     callback({ msg: "La comparaison des mots de passe est incorrecte", type_error: "no_comparaison" });
+//                 }
+//             }
+//         });
+//     } else {
+//         callback({ msg: "Nom d'utilisateur ou mot de passe manquant.", type_error: "no-valid" });
+//     }
+// };
 module.exports.loginUser = async function (username, password, options, callback) {
     if(username != "" && password != ""){
         module.exports.findOneUser(['username', 'email'], username, null, async (err, value) => {
@@ -42,6 +73,7 @@ module.exports.loginUser = async function (username, password, options, callback
     }
     
 }
+
 
 module.exports.logoutUser = async function (user_id, options, callback) {
     User.findByIdAndUpdate(new ObjectId(user_id), { token: '' }, { returnDocument: 'after', runValidators: true }).then((value) => {

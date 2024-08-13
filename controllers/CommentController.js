@@ -6,7 +6,8 @@ const passport = require('passport')
 module.exports.addOneComment = function(req, res) {
     LoggerHttp(req, res)
     req.log.info("Création d'un comment")
-    CommentService.addOneComment(req.body, null, function(err, value) {
+    let opts = {populate: req.query.populate}
+    CommentService.addOneComment(req.body, opts, function(err, value) {
         if (err && err.type_error == "no found") {
             res.statusCode = 404
             res.send(err)

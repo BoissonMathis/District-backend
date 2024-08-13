@@ -6,7 +6,8 @@ const passport = require('passport')
 module.exports.addOnePost = function(req, res) {
     LoggerHttp(req, res)
     req.log.info("Création d'un post")
-    PostService.addOnePost(req.body, null, function(err, value) {
+    let opts = {populate: req.query.populate}
+    PostService.addOnePost(req.body, opts, function(err, value) {
         if (err && err.type_error == "no found") {
             res.statusCode = 404
             res.send(err)
@@ -134,7 +135,7 @@ module.exports.findManyPosts = function(req, res) {
     let searchValue = req.query.q
     let opts = {populate: req.query.populate}
 
-    PostService.findManyPosts(searchValue, field, pageSize, page,  opts, function(err, value) {        
+    PostService.findManyPosts(searchValue, field, pageSize, page, opts, function(err, value) {        
         if (err && err.type_error == "no-valid") {
             res.statusCode = 405
             res.send(err)

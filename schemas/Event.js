@@ -3,6 +3,7 @@ const mongoose = require('mongoose')
 var EventSchema = mongoose.Schema({
     user: {
         type: mongoose.Schema.Types.ObjectId,
+        ref: "User",
         required: true
     },
     type: {
@@ -13,12 +14,12 @@ var EventSchema = mongoose.Schema({
         type: String,
         required: true
     },
-    categorie: [{
+    categorie: String,
+    level: String,
+    contentText: {
         type: String,
-    }],
-    contentText: [{
-        type: String,
-    }],
+        required: true
+    },
     place: String,
     candidate: [{
         type: mongoose.Schema.Types.ObjectId,

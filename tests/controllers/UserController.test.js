@@ -91,6 +91,9 @@ describe("POST - /login", () => {
         .end((err, res) => {
             res.should.have.status(200)
             valid_token = res.body.token
+            // console.log(err)
+            // console.log(value)
+            // console.log(res.body)
             done()
         })
     })

@@ -3,7 +3,17 @@ const mongoose = require('mongoose')
 var CommentSchema = mongoose.Schema({
     user: {
         type: mongoose.Schema.Types.ObjectId,
+        ref: 'User',
         required: true
+    },
+    post: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Post',
+        required: true 
+    },
+    answer: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Comment'
     },
     contentText: {
         type: String,
@@ -14,11 +24,7 @@ var CommentSchema = mongoose.Schema({
     },
     like: [{
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'Users'
-    }],
-    response: [{
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'Comments'
+        ref: 'User'
     }],
     created_by: {
         type: String,

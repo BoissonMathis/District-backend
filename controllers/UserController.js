@@ -1,6 +1,7 @@
 const UserService = require('../services/UserService')
 const LoggerHttp = require ('../utils/logger').http
 const passport = require('passport')
+const TokenUtils = require('./../utils/token')
 
 /**
  * @swagger
@@ -31,6 +32,43 @@ const passport = require('passport')
  *         description: Internal server error.
  */
 // la fonction pour gerer l'authentification depuis passport
+// module.exports.loginUser = function(req, res, next) {
+//     console.log('ok')
+//     if (req.body.username === '' || req.body.password === '') {
+//         res.statusCode = 405;
+//         return res.send({ msg: "Tous les champs doivent être remplis", type_error: "no-valid-login" });
+//     } else {
+//         console.log('ok1')
+//         passport.authenticate('login', { badRequestMessage: "Les champs sont manquants." }, async function(err, user) {
+//             if (err) {
+//                 console.log('Erreur lors de l\'authentification:', err);
+//                 res.statusCode = 401;
+//                 return res.send({ msg: "Le nom d'utilisateur ou le mot de passe n'est pas correct", type_error: "no-valid-login" });
+//             }
+//             req.logIn(user, async function (err) {
+//                 console.log('ok2')
+//                 if (err) {
+//                     console.log('Erreur lors de la connexion de l\'utilisateur:', err);
+//                     res.statusCode = 500;
+//                     return res.send({ msg: "Problème d'authentification sur le serveur.", type_error: "internal" });
+//                 } else {
+//                     console.log('ok3')
+//                     console.log(value)
+//                     var token = TokenUtils.createToken({ _id: value._id }, null)
+//                     console.log(token)
+//                     console.log('ok4')
+//                     res.cookie('authToken', token, {
+//                         httpOnly: true,
+//                         secure: process.env.NODE_ENV === 'production', // Utiliser secure seulement en production
+//                         sameSite: 'Strict'
+//                     });
+//                     console.log('ok5')
+//                     return res.status(200).send({ user, token });
+//                 }
+//             });
+//         })(req, res, next);
+//     }
+// };
 module.exports.loginUser = function(req, res, next) {
     // console.log(req.body)
     if(req.body.username == '' || req.body.password == ''){

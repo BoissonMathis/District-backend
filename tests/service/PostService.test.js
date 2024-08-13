@@ -48,7 +48,7 @@ function rdm_user (tab) {
 // chai.use(chaiHttp)
 
 describe("addOnePost", () => {
-    it("Post correct. - S", () => {
+    it("Post correct. - S", (done) => {
         let post_valid = {
             user: rdm_user(tab_id_users),
             contentText: 'Ceci est un post test'
@@ -60,47 +60,51 @@ describe("addOnePost", () => {
             expect(value).to.haveOwnProperty('contentText')
             id_post_valid = value._id
             posts.push(value)
+            done()
         })
     })
-    it("Post incorrect. (sans user) - E", () => {
+    it("Post incorrect. (sans user) - E", (done) => {
         let post_without_user = {
             contentText: 'Ceci est un post test',
         }
         PostService.addOnePost(post_without_user, null, function (err, value) {
-            expect(value).to.be.a('object');
-            expect(value).to.haveOwnProperty('msg')
-            expect(value).to.haveOwnProperty('fields_with_error')
-            expect(value).to.haveOwnProperty('fields')
-            expect(value['fields']).to.haveOwnProperty('user')
-            expect(value).to.haveOwnProperty('type_error')
-            expect(value['msg']).to.equal('Veuillez renseigner un(e) user')
+            expect(err).to.be.a('object');
+            expect(err).to.haveOwnProperty('msg')
+            expect(err).to.haveOwnProperty('fields_with_error')
+            expect(err).to.haveOwnProperty('fields')
+            expect(err['fields']).to.haveOwnProperty('user')
+            expect(err).to.haveOwnProperty('type_error')
+            expect(err['msg']).to.equal('Veuillez renseigner un(e) user')
+            done()
         })
     })
-    it("Post incorrect. (sans contentText) - E", () => {
+    it("Post incorrect. (sans contentText) - E", (done) => {
         let post_without_textContent = {
             user: rdm_user(tab_id_users)
         }
         PostService.addOnePost(post_without_textContent, null, function (err, value) {
-            expect(value).to.be.a('object');
-            expect(value).to.haveOwnProperty('msg')
-            expect(value).to.haveOwnProperty('fields_with_error')
-            expect(value).to.haveOwnProperty('fields')
-            expect(value['fields']).to.haveOwnProperty('contentText')
-            expect(value).to.haveOwnProperty('type_error')
-            expect(value['msg']).to.equal('Veuillez renseigner un(e) contentText')
+            expect(err).to.be.a('object');
+            expect(err).to.haveOwnProperty('msg')
+            expect(err).to.haveOwnProperty('fields_with_error')
+            expect(err).to.haveOwnProperty('fields')
+            expect(err['fields']).to.haveOwnProperty('contentText')
+            expect(err).to.haveOwnProperty('type_error')
+            expect(err['msg']).to.equal('Veuillez renseigner un(e) contentText')
+            done()
         })
     })
-    it("Post incorrect. (avec id incorrect dans user) - E", () => {
+    it("Post incorrect. (avec id incorrect dans user) - E", (done) => {
         let post_with_incorrect_id = {
             user: '124568',
             contentText: 'Ceci est un post test'
         }
         PostService.addOnePost(post_with_incorrect_id, null, function (err, value) {
-            expect(value).to.be.a('object');
-            expect(value).to.haveOwnProperty('msg')
-            expect(value).to.haveOwnProperty('type_error')
-            expect(value['msg']).to.equal('Format de requete invalid')
-            expect(value['type_error']).to.equal('validator')
+            expect(err).to.be.a('object');
+            expect(err).to.haveOwnProperty('msg')
+            expect(err).to.haveOwnProperty('type_error')
+            expect(err['msg']).to.equal('Format de requete invalid')
+            expect(err['type_error']).to.equal('validator')
+            done()
         })
     })
 })
@@ -276,6 +280,15 @@ describe("findManyPosts", () => {
             expect(value).to.haveOwnProperty("results")
             expect(value["count"]).to.be.equal(4)
             expect(value["results"]).lengthOf(3)
+            expect(err).to.be.null
+            done()
+        })
+    })
+    it("Faire une recherche sur le user avec un id correct - S", (done) => {
+        PostService.findManyPosts(users[0]._id, 'user', 3, 1, null, function (err, value) {
+            expect(value).to.haveOwnProperty("count")
+            expect(value).to.haveOwnProperty("results")
+            expect(value["count"]).to.be.equal(value["results"].length)
             expect(err).to.be.null
             done()
         })

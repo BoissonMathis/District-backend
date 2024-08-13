@@ -287,13 +287,13 @@ describe("deleteManyUsers", () => {
     })
 })
 
-// describe("logoutUser", () => {
-//     it("Décconecter un utilisateur correctement. - S", (done) => {
-//         UserService.deleteManyUsers(tab_id_users, null, function (err, value) {
-//             expect(value).to.be.a('object')
-//             expect(value).to.haveOwnProperty('deletedCount')
-//             expect(value['deletedCount']).is.equal(tab_id_users.length)
-//             done()
-//         })
-//     })
-// })
+describe("logoutUser", () => {
+    it("Décconecter un utilisateur correctement. - S", (done) => {
+        UserService.deleteManyUsers(tab_id_users, null, function (err, value) {
+            expect(value).to.be.a('object')
+            expect(value).to.haveOwnProperty('deletedCount')
+            expect(value['deletedCount']).is.equal(tab_id_users.length)
+            done()
+        })
+    })
+})
