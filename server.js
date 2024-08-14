@@ -52,6 +52,7 @@ const EventController = require("./controllers/EventController");
 const FeedController = require("./controllers/FeedController");
 const FollowController = require("./controllers/FollowController");
 const LikeController = require("./controllers/LikeController");
+const RepostController = require("./controllers/RepostController");
 
 // Déclaration des middlewares
 const DatabaseMiddleware = require("./middlewares/database");
@@ -392,6 +393,21 @@ app.delete(
   DatabaseMiddleware.checkConnexion,
   passport.authenticate("jwt", { session: false }),
   LikeController.dislike
+);
+
+/*--------------------- Création des routes (Repost) ---------------------*/
+app.put(
+  "/repost/:id",
+  DatabaseMiddleware.checkConnexion,
+  passport.authenticate("jwt", { session: false }),
+  RepostController.repost
+);
+
+app.delete(
+  "/cancelrepost/:id",
+  DatabaseMiddleware.checkConnexion,
+  passport.authenticate("jwt", { session: false }),
+  RepostController.cancelrepost
 );
 
 // démarrage du serveur au port définit
