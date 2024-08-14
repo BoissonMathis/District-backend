@@ -183,8 +183,8 @@ describe("dislike", () => {
         expect(err).to.be.a("object");
         expect(err).to.haveOwnProperty("msg");
         expect(err).to.haveOwnProperty("type_error");
-        expect(err["msg"]).to.equal("Le post n'est pas like.");
-        expect(err["type_error"]).to.equal("no-valid");
+        expect(err["msg"]).to.equal("Utilisateur introuvable.");
+        expect(err["type_error"]).to.equal("no-found");
         done();
       }
     );

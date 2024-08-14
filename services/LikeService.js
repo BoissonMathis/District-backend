@@ -107,8 +107,16 @@ module.exports.dislike = async function (user_id, post_id, options, callback) {
           type_error: "no-valid",
         });
       }
-
+      const user = await User.findById(user_id);
       const post = await Post.findById(post_id);
+
+      if (!user) {
+        return callback({
+          msg: "Utilisateur introuvable.",
+          type_error: "no-found",
+        });
+      }
+
       if (post) {
         if (post.like && post.like.includes(user_id)) {
           post.like = post.like.filter(
