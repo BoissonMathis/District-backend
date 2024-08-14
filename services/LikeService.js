@@ -1,37 +1,38 @@
 const UserSchema = require("../schemas/User");
+const PostSchema = require("../schemas/Post");
 const _ = require("lodash");
 const mongoose = require("mongoose");
 const ObjectId = mongoose.Types.ObjectId;
 
 var User = mongoose.model("User", UserSchema);
+var Post = mongoose.model("Post", PostSchema);
 
-module.exports.follow = async function (user_id, follow_id, options, callback) {
+module.exports.like = async function (user_id, post_id, options, callback) {
   if (
     user_id &&
     mongoose.isValidObjectId(user_id) &&
-    follow_id &&
-    mongoose.isValidObjectId(follow_id)
+    post_id &&
+    mongoose.isValidObjectId(post_id)
   ) {
     try {
-      const userToFollow = await User.findById(follow_id);
-      if (!userToFollow) {
+      const postToLike = await Post.findById(post_id);
+      if (!postToLike) {
         return callback({
-          msg: "L'utilisateur à suivre n'existe pas.",
+          msg: "Post introuvable.",
           type_error: "no-found",
         });
       }
 
-      const user = await User.findById(user_id);
-      if (user) {
-        if (user.follows && !user.follows.includes(follow_id)) {
-          user.follows.push(follow_id);
-          user.updated_at = new Date();
+      if (postToLike) {
+        if (postToLike.like && !postToLike.like.includes(user_id)) {
+          postToLike.like.push(user_id);
+          postToLike.updated_at = new Date();
 
-          const updatedUser = await user.save();
-          callback(null, updatedUser.toObject());
+          const updatedPost = await postToLike.save();
+          callback(null, updatedPost.toObject());
         } else {
           callback({
-            msg: "Utilisateur déjà follow.",
+            msg: "Post deja like.",
             type_error: "no-valid",
           });
         }
@@ -80,34 +81,29 @@ module.exports.follow = async function (user_id, follow_id, options, callback) {
   }
 };
 
-module.exports.unfollow = async function (
-  user_id,
-  unfollow_id,
-  options,
-  callback
-) {
+module.exports.dislike = async function (user_id, post_id, options, callback) {
   if (user_id && mongoose.isValidObjectId(user_id)) {
     try {
-      if (!mongoose.isValidObjectId(unfollow_id)) {
+      if (!mongoose.isValidObjectId(post_id)) {
         return callback({
-          msg: "L'ID de l'utilisateur à unfollow n'est pas valide.",
+          msg: "ID du post invalid.",
           type_error: "no-valid",
         });
       }
 
-      const user = await User.findById(user_id);
-      if (user) {
-        if (user.follows && user.follows.includes(unfollow_id)) {
-          user.follows = user.follows.filter(
-            (id) => id.toString() !== unfollow_id.toString()
+      const post = await Post.findById(post_id);
+      if (post) {
+        if (post.like && post.like.includes(user_id)) {
+          post.like = post.like.filter(
+            (id) => id.toString() !== user_id.toString()
           );
-          user.updated_at = new Date();
+          post.updated_at = new Date();
 
-          const updatedUser = await user.save();
-          callback(null, updatedUser.toObject());
+          const updatedPost = await post.save();
+          callback(null, updatedPost.toObject());
         } else {
           callback({
-            msg: "L'utilisateur n'est pas suivi.",
+            msg: "Le post n'est pas like.",
             type_error: "no-valid",
           });
         }
@@ -155,7 +151,3 @@ module.exports.unfollow = async function (
     callback({ msg: "ObjectId non conforme.", type_error: "no-valid" });
   }
 };
-
-// connaitre l'utilisateur connecté
-// connaitre l'utilisateur a unfollow
-// method delete la propriété follow de l'utilisateur connecté et supprimer l'_id de l'utilisateur a unfollow

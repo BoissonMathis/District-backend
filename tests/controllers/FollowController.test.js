@@ -34,7 +34,6 @@ describe("POST - /users", () => {
   it("Création des utilisateurs fictif", (done) => {
     UserService.addManyUsers(users, null, function (err, value) {
       tab_id_users = _.map(value, "_id");
-      console.log(tab_id_users);
       done();
     });
   });
@@ -80,6 +79,86 @@ describe("PUT - /follow", () => {
       .auth(valid_token, { type: "bearer" })
       .end((err, res) => {
         res.should.have.status(200);
+        done();
+      });
+  });
+  it("Follow un utilisateur déja follow. - E", (done) => {
+    chai
+      .request(server)
+      .put("/follow/" + tab_id_users[0])
+      .query({ follow_id: tab_id_users[1].toString() })
+      .auth(valid_token, { type: "bearer" })
+      .end((err, res) => {
+        res.should.have.status(405);
+        done();
+      });
+  });
+  it("Follow un utilisateur qui n'existe pas. - E", (done) => {
+    chai
+      .request(server)
+      .put("/follow/" + tab_id_users[0])
+      .query({ follow_id: "66a2bfe9c6586ef77eef101c" })
+      .auth(valid_token, { type: "bearer" })
+      .end((err, res) => {
+        res.should.have.status(404);
+        done();
+      });
+  });
+  it("Follow un utilisateur avec id incorrect. - E", (done) => {
+    chai
+      .request(server)
+      .put("/follow/" + tab_id_users[0])
+      .query({ follow_id: "741852963" })
+      .auth(valid_token, { type: "bearer" })
+      .end((err, res) => {
+        res.should.have.status(405);
+        done();
+      });
+  });
+});
+
+describe("DELETE - /unfollow", () => {
+  it("Unfollow un utilisateur correctement. - S", (done) => {
+    chai
+      .request(server)
+      .delete("/unfollow/" + tab_id_users[0])
+      .query({ unfollow_id: tab_id_users[1].toString() })
+      .auth(valid_token, { type: "bearer" })
+      .end((err, res) => {
+        res.should.have.status(200);
+        done();
+      });
+  });
+  it("Unfollow un utilisateur que l'on ne follow pas. - E", (done) => {
+    chai
+      .request(server)
+      .delete("/unfollow/" + tab_id_users[0])
+      .query({ follow_id: tab_id_users[1].toString() })
+      .auth(valid_token, { type: "bearer" })
+      .end((err, res) => {
+        res.should.have.status(405);
+        done();
+      });
+  });
+  it("Unfollow un utilisateur qui n'existe pas. - E", (done) => {
+    chai
+      .request(server)
+      .delete("/unfollow/" + tab_id_users[0])
+      .query({ follow_id: "66a2bfe9c6586ef77eef101c" })
+      .auth(valid_token, { type: "bearer" })
+      .end((err, res) => {
+        res.should.have.status(405);
+        done();
+      });
+  });
+  it("Unfollow un utilisateur avec id incorrect. - E", (done) => {
+    chai
+      .request(server)
+      .delete("/unfollow/" + tab_id_users[0])
+      .query({ follow_id: "741852963" })
+      .auth(valid_token, { type: "bearer" })
+      .end((err, res) => {
+        res.should.have.status(405);
         done();
       });
   });

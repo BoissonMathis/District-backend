@@ -91,8 +91,8 @@ describe("follow", () => {
         expect(err).to.be.a("object");
         expect(err).to.haveOwnProperty("msg");
         expect(err).to.haveOwnProperty("type_error");
-        expect(err["msg"]).to.equal("Erreur lors de la mise à jour.");
-        expect(err["type_error"]).to.equal("error-mongo");
+        expect(err["msg"]).to.equal("ObjectId non conforme.");
+        expect(err["type_error"]).to.equal("no-valid");
         done();
       }
     );

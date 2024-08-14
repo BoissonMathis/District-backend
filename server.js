@@ -51,6 +51,7 @@ const CommentController = require("./controllers/CommentController");
 const EventController = require("./controllers/EventController");
 const FeedController = require("./controllers/FeedController");
 const FollowController = require("./controllers/FollowController");
+const LikeController = require("./controllers/LikeController");
 
 // Déclaration des middlewares
 const DatabaseMiddleware = require("./middlewares/database");
@@ -355,7 +356,7 @@ app.delete(
   EventController.deleteManyEvents
 );
 
-/*--------------------- Création des routes (Event - events) ---------------------*/
+/*--------------------- Création des routes (Feed) ---------------------*/
 app.get(
   "/feed/:id",
   DatabaseMiddleware.checkConnexion,
@@ -376,6 +377,21 @@ app.delete(
   DatabaseMiddleware.checkConnexion,
   passport.authenticate("jwt", { session: false }),
   FollowController.unfollow
+);
+
+/*--------------------- Création des routes (Like) ---------------------*/
+app.put(
+  "/like/:id",
+  DatabaseMiddleware.checkConnexion,
+  passport.authenticate("jwt", { session: false }),
+  LikeController.like
+);
+
+app.delete(
+  "/dislike/:id",
+  DatabaseMiddleware.checkConnexion,
+  passport.authenticate("jwt", { session: false }),
+  LikeController.dislike
 );
 
 // démarrage du serveur au port définit
