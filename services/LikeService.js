@@ -2,10 +2,11 @@ const UserSchema = require("../schemas/User");
 const PostSchema = require("../schemas/Post");
 const _ = require("lodash");
 const mongoose = require("mongoose");
+const { post } = require("../server");
 const ObjectId = mongoose.Types.ObjectId;
 
-var User = mongoose.model("User", UserSchema);
 var Post = mongoose.model("Post", PostSchema);
+var User = mongoose.model("User", UserSchema);
 
 module.exports.like = async function (user_id, post_id, options, callback) {
   if (
@@ -16,10 +17,26 @@ module.exports.like = async function (user_id, post_id, options, callback) {
   ) {
     try {
       const postToLike = await Post.findById(post_id);
+      const user = await User.findById(user_id);
+
+      if (!user) {
+        return callback({
+          msg: "Utilisateur introuvable.",
+          type_error: "no-found",
+        });
+      }
+
       if (!postToLike) {
         return callback({
           msg: "Post introuvable.",
           type_error: "no-found",
+        });
+      }
+
+      if (postToLike.user.toString() == user_id) {
+        return callback({
+          msg: "Le créateur du post ne peux pas like",
+          type_error: "no-valid",
         });
       }
 

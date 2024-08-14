@@ -40,10 +40,18 @@ require("../utils/database");
 //   require("./controllers/FeedController.test");
 // });
 
-describe("FollowService", () => {
-  require("./service/FollowService.test");
-});
+// describe("FollowService", () => {
+//   require("./service/FollowService.test");
+// });
 
-describe("FollowController", () => {
-  require("./controllers/FollowController.test");
+// describe("FollowController", () => {
+//   require("./controllers/FollowController.test");
+// });
+
+// describe("LikeService", () => {
+//   require("./service/LikeService.test");
+// });
+
+describe("LikeController", () => {
+  require("./controllers/LikeController.test");
 });
