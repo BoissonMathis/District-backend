@@ -1,11 +1,9 @@
 const UserService = require("../../services/UserService");
 const PostService = require("../../services/PostService");
-const RepostService = require("../../services/RepostService");
 const chai = require("chai");
 const chaiHttp = require("chai-http");
 const expect = chai.expect;
 const server = require("./../../server");
-let should = chai.should();
 const _ = require("lodash");
 
 var tab_id_users = [];
