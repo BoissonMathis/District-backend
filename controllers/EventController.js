@@ -321,3 +321,66 @@ module.exports.deleteEventCandidate = function (req, res) {
     }
   );
 };
+
+module.exports.addEventCandidateValidate = function (req, res) {
+  LoggerHttp(req, res);
+  req.log.info("Ajout d'un candidat validé à l'événement");
+
+  const eventId = req.query.event_id;
+  const candidateId = req.query.candidate_id;
+  const options = { user: req.user };
+
+  EventService.addEventCandidateValidate(
+    eventId,
+    candidateId,
+    options,
+    function (err, value) {
+      if (err && err.type_error === "no-found") {
+        res.status(404).send(err);
+      } else if (
+        err &&
+        (err.type_error === "no-valid" ||
+          err.type_error === "validator" ||
+          err.type_error === "duplicate" ||
+          err.type_error === "already-validated")
+      ) {
+        res.status(400).send(err);
+      } else if (err && err.type_error === "error-mongo") {
+        res.status(500).send(err);
+      } else {
+        res.status(200).send(value);
+      }
+    }
+  );
+};
+
+module.exports.deleteEventCandidateValidate = function (req, res) {
+  LoggerHttp(req, res);
+  req.log.info("Suppression d'un candidat validé de l'événement");
+
+  const eventId = req.query.event_id;
+  const candidateId = req.query.candidate_id;
+  const options = { user: req.user };
+
+  EventService.deleteEventCandidateValidate(
+    eventId,
+    candidateId,
+    options,
+    function (err, value) {
+      if (err && err.type_error === "no-found") {
+        res.status(404).send(err);
+      } else if (
+        err &&
+        (err.type_error === "no-valid" ||
+          err.type_error === "validator" ||
+          err.type_error === "not-validated")
+      ) {
+        res.status(400).send(err);
+      } else if (err && err.type_error === "error-mongo") {
+        res.status(500).send(err);
+      } else {
+        res.status(200).send(value);
+      }
+    }
+  );
+};

@@ -372,17 +372,31 @@ app.delete(
 );
 
 app.post(
-  "/event/add_candidate",
+  "/event/candidate",
   DatabaseMiddleware.checkConnexion,
   passport.authenticate("jwt", { session: false }),
   EventController.addEventCandidate
 );
 
+app.post(
+  "/event/candidate_validate",
+  DatabaseMiddleware.checkConnexion,
+  passport.authenticate("jwt", { session: false }),
+  EventController.addEventCandidateValidate
+);
+
 app.delete(
-  "/event/delete_candidate",
+  "/event/candidate",
   DatabaseMiddleware.checkConnexion,
   passport.authenticate("jwt", { session: false }),
   EventController.deleteEventCandidate
+);
+
+app.delete(
+  "/event/candidate_validate",
+  DatabaseMiddleware.checkConnexion,
+  passport.authenticate("jwt", { session: false }),
+  EventController.deleteEventCandidateValidate
 );
 
 app.delete(

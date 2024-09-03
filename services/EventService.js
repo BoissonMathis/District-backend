@@ -730,6 +730,116 @@ module.exports.deleteEventCandidate = function (
     });
 };
 
-module.exports.addEventValidateCandidate = function () {};
+module.exports.addEventCandidateValidate = function (
+  event_id,
+  candidate_id,
+  options,
+  callback
+) {
+  if (event_id && mongoose.isValidObjectId(event_id)) {
+    Event.findById(event_id)
+      .then((event) => {
+        if (!event) {
+          return callback({
+            msg: "Evenement non trouvé.",
+            type_error: "no-found",
+          });
+        }
+
+        if (event.candidate_validate.includes(candidate_id)) {
+          return callback({
+            msg: "Le candidat est déjà validé pour cet événement.",
+            type_error: "already-validated",
+          });
+        }
+
+        event.candidate_validate.push(candidate_id);
+        event.updated_at = new Date();
+
+        return event.save();
+      })
+      .then((updatedEvent) => {
+        if (updatedEvent) {
+          callback(null, updatedEvent.toObject());
+        } else {
+          callback({
+            msg: "Échec de la mise à jour de l'événement.",
+            type_error: "update-failed",
+          });
+        }
+      })
+      .catch((errors) => {
+        if (errors.code === 11000) {
+          const field = Object.keys(errors.keyPattern)[0];
+          const duplicateErrors = {
+            msg: `Duplicate key error: ${field} must be unique.`,
+            fields_with_error: [field],
+            fields: { [field]: `The ${field} is already taken.` },
+            type_error: "duplicate",
+          };
+          callback(duplicateErrors);
+        } else {
+          const err = {
+            msg: errors.message || "Erreur de validation.",
+            type_error: "validator",
+          };
+          callback(err);
+        }
+      });
+  } else {
+    callback({ msg: "Id invalide.", type_error: "no-valid" });
+  }
+};
+
+module.exports.deleteEventCandidateValidate = function (
+  event_id,
+  candidate_id,
+  options,
+  callback
+) {
+  if (event_id && mongoose.isValidObjectId(event_id)) {
+    Event.findById(event_id)
+      .then((event) => {
+        if (!event) {
+          return callback({
+            msg: "Événement non trouvé.",
+            type_error: "no-found",
+          });
+        }
+
+        const candidateIndex = event.candidate_validate.indexOf(candidate_id);
+        if (candidateIndex === -1) {
+          return callback({
+            msg: "Le candidat n'est pas validé pour cet événement.",
+            type_error: "not-validated",
+          });
+        }
+
+        event.candidate_validate.splice(candidateIndex, 1);
+        event.updated_at = new Date();
+
+        return event.save();
+      })
+      .then((updatedEvent) => {
+        if (updatedEvent) {
+          callback(null, updatedEvent.toObject());
+        } else {
+          callback({
+            msg: "Échec de la mise à jour de l'événement.",
+            type_error: "update-failed",
+          });
+        }
+      })
+      .catch((errors) => {
+        const err = {
+          msg: errors.message || "Erreur de validation.",
+          type_error: "validator",
+        };
+        callback(err);
+      });
+  } else {
+    callback({ msg: "Id invalide.", type_error: "no-valid" });
+  }
+};
 
 module.exports.deleteEventValidateCandidate = function () {};
