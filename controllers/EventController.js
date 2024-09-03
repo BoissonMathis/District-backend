@@ -289,3 +289,35 @@ module.exports.addEventCandidate = function (req, res) {
     }
   );
 };
+
+module.exports.deleteEventCandidate = function (req, res) {
+  LoggerHttp(req, res);
+  req.log.info("Removing candidate from event");
+
+  const event_id = req.query.event_id;
+  const candidate_id = req.query.candidate_id;
+  const options = { user: req.user };
+
+  EventService.deleteEventCandidate(
+    event_id,
+    candidate_id,
+    options,
+    function (err, value) {
+      if (err && err.type_error === "no-found") {
+        res.status(404).json(err);
+      } else if (
+        err &&
+        (err.type_error === "no-valid" ||
+          err.type_error === "validator" ||
+          err.type_error === "duplicate" ||
+          err.type_error === "not-in-event")
+      ) {
+        res.status(405).json(err);
+      } else if (err && err.type_error === "error-mongo") {
+        res.status(500).json(err);
+      } else {
+        res.status(200).json(value);
+      }
+    }
+  );
+};

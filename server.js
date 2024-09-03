@@ -365,13 +365,6 @@ app.put(
 );
 
 app.delete(
-  "/event/:id",
-  DatabaseMiddleware.checkConnexion,
-  passport.authenticate("jwt", { session: false }),
-  EventController.deleteOneEvent
-);
-
-app.delete(
   "/events",
   DatabaseMiddleware.checkConnexion,
   passport.authenticate("jwt", { session: false }),
@@ -383,6 +376,20 @@ app.post(
   DatabaseMiddleware.checkConnexion,
   passport.authenticate("jwt", { session: false }),
   EventController.addEventCandidate
+);
+
+app.delete(
+  "/event/delete_candidate",
+  DatabaseMiddleware.checkConnexion,
+  passport.authenticate("jwt", { session: false }),
+  EventController.deleteEventCandidate
+);
+
+app.delete(
+  "/event/:id",
+  DatabaseMiddleware.checkConnexion,
+  passport.authenticate("jwt", { session: false }),
+  EventController.deleteOneEvent
 );
 
 /*--------------------- Création des routes (Feed) ---------------------*/

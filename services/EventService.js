@@ -20,7 +20,6 @@ module.exports.addOneEvent = async function (event, options, callback) {
     var errors = new_event.validateSync();
 
     if (errors) {
-      console.log("LAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAa ", errors);
       errors = errors["errors"];
       var text = Object.keys(errors)
         .map((e) => {
@@ -71,7 +70,6 @@ module.exports.addOneEvent = async function (event, options, callback) {
       // callback(null, new_event.toObject());
     }
   } catch (error) {
-    console.log("LAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA ", error);
     if (error.code === 11000) {
       // Erreur de duplicité
       var field = Object.keys(error.keyValue)[0];
@@ -449,7 +447,7 @@ module.exports.updateOneEvent = function (event_id, update, options, callback) {
         }
       });
   } else {
-    callback({ msg: "Id invalide.", type_error: "no-valid" });
+    callback({ msg: ".", type_error: "no-valid" });
   }
 };
 
@@ -519,7 +517,7 @@ module.exports.updateManyEvents = function (
         }
       });
   } else {
-    callback({ msg: "Id invalide.", type_error: "no-valid" });
+    callback({ msg: ".", type_error: "no-valid" });
   }
 };
 
@@ -542,7 +540,7 @@ module.exports.deleteOneEvent = function (event_id, options, callback) {
         });
       });
   } else {
-    callback({ msg: "Id invalide.", type_error: "no-valid" });
+    callback({ msg: ".", type_error: "no-valid" });
   }
 };
 
@@ -663,7 +661,74 @@ module.exports.addEventCandidate = function (
     });
 };
 
-module.exports.deleteEventCandidate = function () {};
+module.exports.deleteEventCandidate = function (
+  event_id,
+  candidate_id,
+  options,
+  callback
+) {
+  if (
+    !mongoose.isValidObjectId(event_id) ||
+    !mongoose.isValidObjectId(candidate_id)
+  ) {
+    return callback({ msg: "Invalid ID.", type_error: "no-valid" });
+  }
+
+  Event.findById(event_id)
+    .then((event) => {
+      if (!event) {
+        return callback({ msg: "Event not found.", type_error: "no-found" });
+      }
+
+      const candidateIndex = event.candidate.indexOf(candidate_id);
+      if (candidateIndex === -1) {
+        return callback({
+          msg: "Candidate not found in the event.",
+          type_error: "not-in-event",
+        });
+      }
+
+      event.candidate.splice(candidateIndex, 1);
+      event.updated_at = new Date();
+
+      event
+        .save()
+        .then((updatedEvent) => {
+          callback(null, updatedEvent.toObject());
+        })
+        .catch((err) => {
+          if (err.code === 11000) {
+            const field = Object.keys(err.keyPattern)[0];
+            const duplicateErrors = {
+              msg: `Duplicate key error: ${field} must be unique.`,
+              fields_with_error: [field],
+              fields: { [field]: `The ${field} is already taken.` },
+              type_error: "duplicate",
+            };
+            callback(duplicateErrors);
+          } else {
+            err = err.errors;
+            const text = Object.keys(err)
+              .map((e) => err[e].properties.message)
+              .join(" ");
+            const fields = Object.keys(err).reduce((result, value) => {
+              result[value] = err[value].properties.message;
+              return result;
+            }, {});
+            const validationError = {
+              msg: text,
+              fields_with_error: Object.keys(err),
+              fields: fields,
+              type_error: "validator",
+            };
+            callback(validationError);
+          }
+        });
+    })
+    .catch((err) => {
+      callback({ msg: "Internal server error.", type_error: "error-mongo" });
+    });
+};
 
 module.exports.addEventValidateCandidate = function () {};
 
