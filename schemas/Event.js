@@ -1,42 +1,69 @@
-const mongoose = require('mongoose')
+const mongoose = require("mongoose");
+const { updateCompletedStatus } = require("../middlewares/eventCompleted");
 
 var EventSchema = mongoose.Schema({
-    user: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "User",
-        required: true
+  user: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "User",
+    required: true,
+  },
+  type: {
+    type: String,
+    required: true,
+  },
+  date: {
+    type: String,
+    required: true,
+  },
+  categorie: String,
+  level: String,
+  contentText: {
+    type: String,
+    required: true,
+  },
+  place: String,
+  candidate: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Users",
     },
-    type: {
-        type: String,
-        required: true
+  ],
+  candidate_validate: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Users",
     },
-    date: {
-        type: String,
-        required: true
+  ],
+  slots: {
+    type: Number,
+    required: true,
+    validate: {
+      validator: function (value) {
+        return value <= 12;
+      },
+      message: (props) =>
+        `Slots must be less than or equal to 12. You entered ${props.value}.`,
     },
-    categorie: String,
-    level: String,
-    contentText: {
-        type: String,
-        required: true
+  },
+  completed: {
+    type: Boolean,
+    required: true,
+    default: false,
+  },
+  created_by: {
+    type: String,
+    required: true,
+    default: function () {
+      return this._id ? this._id.toString() : null;
     },
-    place: String,
-    candidate: [{
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'Users'
-    }],
-    created_by: {
-        type: String,
-        required: true,
-        default: function() {
-            return this._id ? this._id.toString() : null;
-        }
-    },
-    created_at: {
-        type: String,
-        default: new Date()
-    },
-    updated_at: String
-})
+  },
+  created_at: {
+    type: String,
+    default: new Date(),
+  },
+  updated_at: String,
+});
 
-module.exports = EventSchema
+EventSchema.pre("save", updateCompletedStatus);
+
+module.exports = EventSchema;

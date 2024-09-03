@@ -378,6 +378,13 @@ app.delete(
   EventController.deleteManyEvents
 );
 
+app.post(
+  "/event/add_candidate",
+  DatabaseMiddleware.checkConnexion,
+  passport.authenticate("jwt", { session: false }),
+  EventController.addEventCandidate
+);
+
 /*--------------------- Création des routes (Feed) ---------------------*/
 app.get(
   "/feed/:id",

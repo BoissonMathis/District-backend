@@ -20,19 +20,26 @@ module.exports.addOneEvent = async function (event, options, callback) {
     var errors = new_event.validateSync();
 
     if (errors) {
+      console.log("LAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAa ", errors);
       errors = errors["errors"];
-      var path = Object.keys(errors).map((e) => {
-        return errors[e]["properties"]["path"];
-      });
+      var text = Object.keys(errors)
+        .map((e) => {
+          return errors[e]["properties"]
+            ? errors[e]["properties"]["message"]
+            : errors[e]["reason"];
+        })
+        .join(" ");
       var fields = _.transform(
         Object.keys(errors),
         function (result, value) {
-          result[value] = errors[value]["properties"]["message"];
+          result[value] = errors[value]["properties"]
+            ? errors[value]["properties"]["message"]
+            : String(errors[value]["reason"]);
         },
         {}
       );
       var err = {
-        msg: `Veuillez renseigner un(e) ${path}`,
+        msg: text,
         fields_with_error: Object.keys(errors),
         fields: fields,
         type_error: "validator",
@@ -64,6 +71,7 @@ module.exports.addOneEvent = async function (event, options, callback) {
       // callback(null, new_event.toObject());
     }
   } catch (error) {
+    console.log("LAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA ", error);
     if (error.code === 11000) {
       // Erreur de duplicité
       var field = Object.keys(error.keyValue)[0];
@@ -313,46 +321,6 @@ module.exports.findOneEvent = function (tab_field, value, options, callback) {
     }
   }
 };
-
-// module.exports.findManyEvents = function(search, fields, limit, page, options, callback) {
-//     let populate = options && options.populate ? [{path: 'user', select: '-token -password'}] : [];
-//     page = !page ? 1 : parseInt(page);
-//     limit = !limit ? 10 : parseInt(limit);
-
-//     var field_unique = ['user', 'level', 'categorie', 'type']
-
-//     if (typeof page !== "number" || typeof limit !== "number" || isNaN(page) || isNaN(limit)) {
-//         callback({msg: `format de ${typeof page !== "number" ? "page" : "limit"} est incorrect`, type_error: "no-valid"});
-//     } else {
-//         let query_mongo = {};
-//         if (search && fields.includes('user')) {
-//             if (Types.ObjectId.isValid(search)) {
-//                 query_mongo[fields] = new Types.ObjectId(search);
-//             } else {
-//                 callback({msg: "La valeur de recherche n'est pas un id valide", type_error: "no-valid"});
-//             }
-//         }else if(search && fields !== 'user'){
-//             query_mongo[fields] = { $regex: search, $options: 'i' };
-//         }
-//         Event.countDocuments(query_mongo).then((count) => {
-//             if (count > 0) {
-//                 const skip = (page - 1) * limit;
-//                 Event.find(query_mongo, null, {skip: skip, limit: limit, lean: true})
-//                     .populate(populate)
-//                     .then((results) => {
-//                         callback(null, {count: count, results: results});
-//                     })
-//                     .catch((err) => {
-//                         callback(err);
-//                     });
-//             } else {
-//                 callback(null, {count: 0, results: []});
-//             }
-//         }).catch((err) => {
-//             callback(err);
-//         });
-//     }
-// }
 
 module.exports.findManyEvents = function (
   search,
@@ -626,3 +594,77 @@ module.exports.deleteManyEvents = function (events_id, options, callback) {
     callback({ msg: "Tableau non conforme.", type_error: "no-valid" });
   }
 };
+
+module.exports.addEventCandidate = function (
+  event_id,
+  candidate_id,
+  options,
+  callback
+) {
+  if (
+    !mongoose.isValidObjectId(event_id) ||
+    !mongoose.isValidObjectId(candidate_id)
+  ) {
+    return callback({ msg: "Invalid ID.", type_error: "no-valid" });
+  }
+
+  Event.findById(event_id)
+    .then((event) => {
+      if (!event) {
+        return callback({ msg: "Event not found.", type_error: "no-found" });
+      }
+
+      if (event.candidate.includes(candidate_id)) {
+        return callback({
+          msg: "Candidate already added.",
+          type_error: "duplicate",
+        });
+      }
+
+      event.candidate.push(candidate_id);
+      event.updated_at = new Date();
+
+      event
+        .save()
+        .then((updatedEvent) => {
+          callback(null, updatedEvent.toObject());
+        })
+        .catch((err) => {
+          if (err.code === 11000) {
+            const field = Object.keys(err.keyPattern)[0];
+            const duplicateErrors = {
+              msg: `Duplicate key error: ${field} must be unique.`,
+              fields_with_error: [field],
+              fields: { [field]: `The ${field} is already taken.` },
+              type_error: "duplicate",
+            };
+            callback(duplicateErrors);
+          } else {
+            err = err.errors;
+            const text = Object.keys(err)
+              .map((e) => err[e].properties.message)
+              .join(" ");
+            const fields = Object.keys(err).reduce((result, value) => {
+              result[value] = err[value].properties.message;
+              return result;
+            }, {});
+            const validationError = {
+              msg: text,
+              fields_with_error: Object.keys(err),
+              fields: fields,
+              type_error: "validator",
+            };
+            callback(validationError);
+          }
+        });
+    })
+    .catch((err) => {
+      callback({ msg: "Internal server error.", type_error: "error-mongo" });
+    });
+};
+
+module.exports.deleteEventCandidate = function () {};
+
+module.exports.addEventValidateCandidate = function () {};
+
+module.exports.deleteEventValidateCandidate = function () {};
