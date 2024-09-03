@@ -87,6 +87,7 @@ module.exports.unfollow = async function (
   callback
 ) {
   if (user_id && mongoose.isValidObjectId(user_id)) {
+    console.log(unfollow_id);
     try {
       if (!mongoose.isValidObjectId(unfollow_id)) {
         return callback({

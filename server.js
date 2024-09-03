@@ -5,10 +5,13 @@ const Config = require("./config");
 const Logger = require("./utils/logger").pino;
 const swaggerJsdoc = require("swagger-jsdoc");
 const swaggerUi = require("swagger-ui-express");
+const fs = require("fs");
+const path = require("path");
 // const cookieParser = require('cookie-parser');
 
 // Création de notre application express.js
 const app = express();
+app.use("/data/images", express.static(path.join(__dirname, "/data/images")));
 
 // Configuration Swagger
 const swaggerOptions = require("./swagger.json");
@@ -42,6 +45,7 @@ app.use(
 
 app.use(passport.initialize());
 app.use(passport.session());
+app.use("/images", express.static(path.join(__dirname, "../data/image")));
 // app.use(cookieParser())
 
 // Déclaration des controllers pour l'utilisateur
@@ -60,6 +64,139 @@ const LoggerMiddleware = require("./middlewares/logger");
 
 // Déclaration des middlewares à express
 app.use(bodyParser.json(), LoggerMiddleware.addLogger);
+
+const upload = require("./utils/multer.config");
+const UserSchema = require("./schemas/User");
+const mongoose = require("mongoose");
+var User = mongoose.model("User", UserSchema);
+
+app.post("/upload/profil_picture", upload.single("file"), async (req, res) => {
+  try {
+    const userId = req.query.user_id;
+    const picture = req.file ? `/images/${req.file.filename}` : null;
+
+    if (!picture) {
+      return res.status(400).json({ message: "No file uploaded." });
+    }
+
+    const currentUser = await User.findById(userId);
+    if (!currentUser) {
+      return res.status(404).json({ message: "User not found." });
+    }
+
+    const oldPicturePath = currentUser.profil_image;
+
+    const updatedUser = await User.findByIdAndUpdate(
+      userId,
+      { profil_image: `http://localhost:3000/data${picture}` },
+      {
+        new: true,
+        runValidators: true,
+      }
+    );
+
+    if (!updatedUser) {
+      return res.status(404).json({ message: "User not found." });
+    }
+
+    if (
+      oldPicturePath &&
+      oldPicturePath.startsWith("http://localhost:3000/data/")
+    ) {
+      const oldImagePath = path.join(
+        __dirname,
+        oldPicturePath.replace("http://localhost:3000", ".")
+      );
+
+      fs.access(oldImagePath, fs.constants.F_OK, (err) => {
+        if (!err) {
+          fs.unlink(oldImagePath, (err) => {
+            if (err) {
+              console.error(
+                `Failed to delete old image at ${oldImagePath}: ${err.message}`
+              );
+            } else {
+              console.log(`Successfully deleted old image at ${oldImagePath}`);
+            }
+          });
+        } else {
+          console.error(`Old image not found at ${oldImagePath}`);
+        }
+      });
+    }
+
+    res.status(200).json({
+      message: "Profile picture updated successfully.",
+      user: updatedUser,
+    });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+app.post("/upload/banner_picture", upload.single("file"), async (req, res) => {
+  try {
+    const userId = req.query.user_id;
+    const picture = req.file ? `/images/${req.file.filename}` : null;
+
+    if (!picture) {
+      return res.status(400).json({ message: "No file uploaded." });
+    }
+
+    const currentUser = await User.findById(userId);
+    if (!currentUser) {
+      return res.status(404).json({ message: "User not found." });
+    }
+
+    const oldPicturePath = currentUser.banner_image;
+
+    const updatedUser = await User.findByIdAndUpdate(
+      userId,
+      { banner_image: `http://localhost:3000/data${picture}` },
+      {
+        new: true,
+        runValidators: true,
+      }
+    );
+
+    if (!updatedUser) {
+      return res.status(404).json({ message: "User not found." });
+    }
+
+    if (
+      oldPicturePath &&
+      oldPicturePath.startsWith("http://localhost:3000/data/")
+    ) {
+      const oldImagePath = path.join(
+        __dirname,
+        oldPicturePath.replace("http://localhost:3000", ".")
+      );
+
+      fs.access(oldImagePath, fs.constants.F_OK, (err) => {
+        if (!err) {
+          fs.unlink(oldImagePath, (err) => {
+            if (err) {
+              console.error(
+                `Failed to delete old image at ${oldImagePath}: ${err.message}`
+              );
+            } else {
+              console.log(`Successfully deleted old image at ${oldImagePath}`);
+            }
+          });
+        } else {
+          console.error(`Old image not found at ${oldImagePath}`);
+        }
+      });
+    }
+
+    res.status(200).json({
+      message: "Banner picture updated successfully.",
+      user: updatedUser,
+    });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
 
 /*--------------------- Création des routes (User - Utilisateur) ---------------------*/
 app.post("/login", DatabaseMiddleware.checkConnexion, UserController.loginUser);
