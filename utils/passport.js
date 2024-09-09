@@ -8,7 +8,6 @@ const JWTStrategy = passportJWT.Strategy;
 const ExtractJWT = passportJWT.ExtractJwt;
 
 passport.serializeUser((user, done) => {
-  console.log("USER =>", user);
   done(null, user);
 });
 passport.deserializeUser((user, done) => done(null, user));
@@ -40,7 +39,6 @@ passport.use(
         } else if (value.token == "") {
           done(null, false, { msg: "unauthorized", type_error: "no-valid" });
         } else {
-          console.log("LAAAAAAAAAAAAAAAAAAAAAAAAAA", value);
           done(null, value);
         }
       });

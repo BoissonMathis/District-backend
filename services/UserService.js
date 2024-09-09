@@ -18,7 +18,6 @@ module.exports.loginUser = async function (
   callback
 ) {
   if (username !== "" && password !== "") {
-    // Recherche de l'utilisateur par nom d'utilisateur ou email
     module.exports.findOneUser(
       ["username", "email"],
       username,
@@ -29,7 +28,6 @@ module.exports.loginUser = async function (
         } else {
           if (bcrypt.compareSync(password, value.password)) {
             var token = TokenUtils.createToken({ _id: value._id }, null);
-            // Mise à jour du token dans la base de données
             User.findByIdAndUpdate(
               value._id,
               { token: token },
@@ -38,7 +36,6 @@ module.exports.loginUser = async function (
               .then((updatedUser) => {
                 try {
                   if (updatedUser) {
-                    // Mise à jour des chemins des images
                     updatedUser.profil_image =
                       updatedUser.profil_image ||
                       "https://journalmetro.com/wp-content/uploads/2017/04/default_profile_400x400.png?resize=400%2C400?fit=160%2C160";

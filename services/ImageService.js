@@ -1,9 +1,11 @@
 const UserSchema = require("../schemas/User");
+const PostSchema = require("../schemas/Post");
 const mongoose = require("mongoose");
 const fs = require("fs");
 const path = require("path");
 
-var User = mongoose.model("User", UserSchema);
+let User = mongoose.model("User", UserSchema);
+let Post = mongoose.model("Post", PostSchema);
 
 module.exports.updateProfilePicture = async function (userId, picture) {
   try {
@@ -59,7 +61,6 @@ module.exports.updateProfilePicture = async function (userId, picture) {
 
 module.exports.updateBannerPicture = async (userId, picture) => {
   try {
-    // Rechercher l'utilisateur actuel
     const currentUser = await User.findById(userId);
     if (!currentUser) {
       return {
@@ -68,30 +69,24 @@ module.exports.updateBannerPicture = async (userId, picture) => {
       };
     }
 
-    // Conserver l'ancien chemin de l'image de bannière
     const oldPicturePath = currentUser.banner_image;
     const newPicturePath = `http://localhost:3000/data${picture}`;
 
-    // Mettre à jour l'utilisateur avec le nouveau chemin d'image
     currentUser.banner_image = newPicturePath;
     await currentUser.save();
 
-    // Si une ancienne image existe, supprimer l'ancienne image
     if (
       oldPicturePath &&
       oldPicturePath.startsWith("http://localhost:3000/data/")
     ) {
-      // Construire le chemin absolu de l'ancienne image
       const oldImagePath = path.join(
         __dirname,
-        "..", // Monter d'un niveau pour sortir du répertoire 'services'
-        oldPicturePath.replace("http://localhost:3000", ".") // Remplacer l'URL par le chemin relatif
+        "..",
+        oldPicturePath.replace("http://localhost:3000", ".")
       );
 
-      // Log du chemin de l'ancienne image
       console.log(`Attempting to delete old image at: ${oldImagePath}`);
 
-      // Vérifier si l'ancien fichier existe et le supprimer
       fs.access(oldImagePath, fs.constants.F_OK, (err) => {
         if (!err) {
           fs.unlink(oldImagePath, (err) => {
@@ -111,6 +106,74 @@ module.exports.updateBannerPicture = async (userId, picture) => {
 
     return { user: currentUser.toObject() };
   } catch (error) {
+    return {
+      error: { message: error.message },
+      statusCode: 500,
+    };
+  }
+};
+
+module.exports.updatePostImage = async (postId, picture) => {
+  try {
+    console.log(
+      `Tentative de mise à jour de l'image du post avec l'ID: ${postId}`
+    );
+    const currentPost = await Post.findById(postId);
+    if (!currentPost) {
+      console.error("Post non trouvé");
+      return {
+        error: { message: "Post not found." },
+        statusCode: 404,
+      };
+    }
+
+    console.log(`Post trouvé : ${JSON.stringify(currentPost)}`);
+    const oldPicturePath = currentPost.contentImage;
+    const newPicturePath = `http://localhost:3000/data${picture}`;
+    console.log(`Nouvelle image : ${newPicturePath}`);
+
+    currentPost.contentImage = newPicturePath;
+    await currentPost.save();
+    console.log(`Post mis à jour avec la nouvelle image : ${newPicturePath}`);
+
+    if (
+      oldPicturePath &&
+      oldPicturePath.startsWith("http://localhost:3000/data/")
+    ) {
+      const oldImagePath = path.join(
+        __dirname,
+        "..",
+        oldPicturePath.replace("http://localhost:3000", ".")
+      );
+
+      console.log(
+        `Tentative de suppression de l'ancienne image : ${oldImagePath}`
+      );
+
+      fs.access(oldImagePath, fs.constants.F_OK, (err) => {
+        if (!err) {
+          fs.unlink(oldImagePath, (err) => {
+            if (err) {
+              console.error(
+                `Échec de la suppression de l'ancienne image à ${oldImagePath}: ${err.message}`
+              );
+            } else {
+              console.log(
+                `Ancienne image supprimée avec succès : ${oldImagePath}`
+              );
+            }
+          });
+        } else {
+          console.error(`Ancienne image non trouvée à ${oldImagePath}`);
+        }
+      });
+    }
+
+    return { post: currentPost.toObject() };
+  } catch (error) {
+    console.error(
+      `Erreur lors de la mise à jour de l'image du post: ${error.message}`
+    );
     return {
       error: { message: error.message },
       statusCode: 500,

@@ -25,13 +25,13 @@ var EventSchema = mongoose.Schema({
   candidate: [
     {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "Users",
+      ref: "User",
     },
   ],
   candidate_validate: [
     {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "Users",
+      ref: "User",
     },
   ],
   slots: {

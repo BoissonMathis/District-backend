@@ -170,6 +170,7 @@ app.post(
   "/post",
   DatabaseMiddleware.checkConnexion,
   passport.authenticate("jwt", { session: false }),
+  upload.single("image"), // Middleware pour accepter une seule image
   PostController.addOnePost
 );
 

@@ -153,11 +153,16 @@ module.exports.addManyEvents = async function (events, options, callback) {
 
 module.exports.findOneEventById = function (event_id, options, callback) {
   let opts = {
-    populate:
-      options && options.populate
-        ? [{ path: "user", select: "-token -password" }]
-        : [],
+    populate: [],
   };
+
+  if (options && options.populate) {
+    opts.populate.push(
+      { path: "user", select: "-token -password" },
+      { path: "candidate", select: "-password -token" },
+      { path: "candidate_validate", select: "-password -token" }
+    );
+  }
 
   if (event_id && mongoose.isValidObjectId(event_id)) {
     Event.findById(event_id, null, opts)
@@ -167,17 +172,21 @@ module.exports.findOneEventById = function (event_id, options, callback) {
             callback(null, value.toObject());
           } else {
             callback({
-              msg: "Aucun evenement trouvé.",
+              msg: "Aucun événement trouvé.",
               type_error: "no-found",
             });
           }
         } catch (e) {
           console.log(e);
+          callback({
+            msg: "Erreur lors du traitement de l'événement.",
+            type_error: "internal-error",
+          });
         }
       })
       .catch((err) => {
         callback({
-          msg: "Impossible de chercher l'élément.",
+          msg: "Impossible de chercher l'événement.",
           type_error: "error-mongo",
         });
       });
@@ -253,12 +262,19 @@ module.exports.findManyEventsById = function (events_id, options, callback) {
 };
 
 module.exports.findOneEvent = function (tab_field, value, options, callback) {
+  // Options de population pour les références dans le schéma
   let opts = {
-    populate:
-      options && options.populate
-        ? [{ path: "user", select: "-token -password" }]
-        : [],
+    populate: [],
   };
+
+  if (options && options.populate) {
+    opts.populate.push(
+      { path: "user", select: "-token -password" }, // Populate du champ user
+      { path: "candidate", select: "-password -token" }, // Populate du tableau candidate
+      { path: "candidate_validate", select: "-password -token" } // Populate du tableau candidate_validate
+    );
+  }
+
   var field_unique = ["user", "level", "categorie", "type"];
 
   if (
@@ -273,26 +289,27 @@ module.exports.findOneEvent = function (tab_field, value, options, callback) {
     _.forEach(tab_field, (e) => {
       obj_find.push({ [e]: value });
     });
+
     Event.findOne({ $or: obj_find }, null, opts)
       .then((value) => {
         if (value) {
           callback(null, value.toObject());
         } else {
-          callback({ msg: "Evenement non trouvé.", type_error: "no-found" });
+          callback({ msg: "Événement non trouvé.", type_error: "no-found" });
         }
       })
       .catch((err) => {
-        callback({ msg: "Error interne mongo", type_error: "error-mongo" });
+        callback({ msg: "Erreur interne MongoDB", type_error: "error-mongo" });
       });
   } else {
     let msg = "";
     if (!tab_field || !Array.isArray(tab_field)) {
-      msg += "Les champs de recherche sont incorrecte.";
+      msg += "Les champs de recherche sont incorrects.";
     }
     if (!value) {
       msg += msg
-        ? " Et la valeur de recherche est vide"
-        : "La valeur de recherche est vide";
+        ? " Et la valeur de recherche est vide."
+        : "La valeur de recherche est vide.";
     }
     if (
       _.filter(tab_field, (e) => {
@@ -305,10 +322,10 @@ module.exports.findOneEvent = function (tab_field, value, options, callback) {
       msg += msg
         ? ` Et (${field_not_authorized.join(
             ","
-          )}) ne sont pas des champs de recherche autorisé.`
+          )}) ne sont pas des champs de recherche autorisés.`
         : `Les champs (${field_not_authorized.join(
             ","
-          )}) ne sont pas des champs de recherche autorisé.`;
+          )}) ne sont pas des champs de recherche autorisés.`;
       callback({
         msg: msg,
         type_error: "no-valid",
@@ -333,6 +350,7 @@ module.exports.findManyEvents = function (
       : [];
   page = !page ? 1 : parseInt(page);
   limit = !limit ? 10 : parseInt(limit);
+  console.log(search, limit, page);
 
   const allowedFields = ["user", "level", "categorie", "type"];
 
@@ -367,6 +385,7 @@ module.exports.findManyEvents = function (
         query_mongo[field] = { $regex: search[field], $options: "i" };
       }
     } else {
+      console.log("ICII", field);
       return callback({
         msg: `Le champ '${field}' n'est pas un champ de recherche autorisé.`,
         type_error: "no-valid",
@@ -447,7 +466,10 @@ module.exports.updateOneEvent = function (event_id, update, options, callback) {
         }
       });
   } else {
-    callback({ msg: ".", type_error: "no-valid" });
+    callback({
+      msg: "Id invalide.",
+      type_error: "no-valid",
+    });
   }
 };
 
@@ -517,7 +539,7 @@ module.exports.updateManyEvents = function (
         }
       });
   } else {
-    callback({ msg: ".", type_error: "no-valid" });
+    callback({ msg: "Id's invalide.", type_error: "no-valid" });
   }
 };
 
@@ -540,7 +562,7 @@ module.exports.deleteOneEvent = function (event_id, options, callback) {
         });
       });
   } else {
-    callback({ msg: ".", type_error: "no-valid" });
+    callback({ msg: "Id invalide.", type_error: "no-valid" });
   }
 };
 

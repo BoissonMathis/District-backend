@@ -98,7 +98,7 @@ describe("POST - /users", () => {
         },
       ])
       .end((err, res) => {
-        res.should.have.status(201);
+        expect(res).to.have.status(201);
         users = [...users, ...res.body];
         done();
       });
@@ -112,7 +112,7 @@ describe("POST - /login", () => {
       .post("/login")
       .send({ username: "Lutfu", password: "lutfu" })
       .end((err, res) => {
-        res.should.have.status(200);
+        expect(res).to.have.status(200);
         valid_token = res.body.token;
         done();
       });
@@ -123,7 +123,7 @@ describe("POST - /login", () => {
       .post("/login")
       .send({ username: "zdesfrgtyhj", password: "lutfu" })
       .end((err, res) => {
-        res.should.have.status(401);
+        expect(res).to.have.status(401);
         done();
       });
   });
@@ -133,7 +133,7 @@ describe("POST - /login", () => {
       .post("/login")
       .send({ username: "Lutfu", password: "lut" })
       .end((err, res) => {
-        res.should.have.status(401);
+        expect(res).to.have.status(401);
         done();
       });
   });
@@ -143,7 +143,7 @@ describe("POST - /login", () => {
       .post("/login")
       .send({ username: "", password: "lut" })
       .end((err, res) => {
-        res.should.have.status(405);
+        expect(res).to.have.status(405);
         done();
       });
   });
@@ -155,8 +155,7 @@ describe("POST - /logout", () => {
       .request(server)
       .post("/logout/" + users[0]._id)
       .end((err, res) => {
-        // res.should.have.status(200)
-        console.log(err);
+        expect(res).to.have.status(200);
         done();
       });
   });
@@ -167,9 +166,7 @@ describe("POST - /logout", () => {
       .auth(valid_token, { type: "bearer" })
       .send({ username: "Olivier" })
       .end((err, res) => {
-        // console.log(err)
-        console.log(err);
-        // res.should.have.status(401)
+        expect(res).to.have.status(401);
         done();
       });
   });
@@ -182,7 +179,7 @@ describe("POST - /login", () => {
       .post("/login")
       .send({ username: "Lutfu", password: "lutfu" })
       .end((err, res) => {
-        res.should.have.status(200);
+        expect(res).to.have.status(200);
         valid_token = res.body.token;
         done();
       });
@@ -196,7 +193,7 @@ describe("GET - /user/:id", () => {
       .get("/user/" + users[0]._id)
       .auth(valid_token, { type: "bearer" })
       .end((err, res) => {
-        res.should.have.status(200);
+        expect(res).to.have.status(200);
         done();
       });
   });
@@ -207,7 +204,7 @@ describe("GET - /user/:id", () => {
       .get("/user/665f18739d3e172be5daf092")
       .auth(valid_token, { type: "bearer" })
       .end((err, res) => {
-        res.should.have.status(404);
+        expect(res).to.have.status(404);
         done();
       });
   });
@@ -218,7 +215,7 @@ describe("GET - /user/:id", () => {
       .get("/user/123")
       .auth(valid_token, { type: "bearer" })
       .end((err, res) => {
-        res.should.have.status(405);
+        expect(res).to.have.status(405);
         done();
       });
   });
@@ -228,7 +225,7 @@ describe("GET - /user/:id", () => {
       .request(server)
       .get("/user/" + users[0]._id)
       .end((err, res) => {
-        res.should.have.status(401);
+        expect(res).to.have.status(401);
         done();
       });
   });
@@ -242,7 +239,7 @@ describe("GET - /user", () => {
       .auth(valid_token, { type: "bearer" })
       .query({ fields: ["username"], value: "Lutfu" })
       .end((err, res) => {
-        res.should.have.status(200);
+        expect(res).to.have.status(200);
         done();
       });
   });
@@ -254,7 +251,7 @@ describe("GET - /user", () => {
       .auth(valid_token, { type: "bearer" })
       .query({ fields: ["bio"], value: users[0].bio })
       .end((err, res) => {
-        res.should.have.status(405);
+        expect(res).to.have.status(405);
         done();
       });
   });
@@ -266,7 +263,7 @@ describe("GET - /user", () => {
       .auth(valid_token, { type: "bearer" })
       .query({ value: users[0].username })
       .end((err, res) => {
-        res.should.have.status(405);
+        expect(res).to.have.status(405);
         done();
       });
   });
@@ -278,7 +275,7 @@ describe("GET - /user", () => {
       .auth(valid_token, { type: "bearer" })
       .query({ fields: ["username"], value: "" })
       .end((err, res) => {
-        res.should.have.status(405);
+        expect(res).to.have.status(405);
         done();
       });
   });
@@ -289,7 +286,7 @@ describe("GET - /user", () => {
       .get("/user")
       .auth(valid_token, { type: "bearer" })
       .end((err, res) => {
-        res.should.have.status(405);
+        expect(res).to.have.status(405);
         done();
       });
   });
@@ -301,7 +298,7 @@ describe("GET - /user", () => {
       .auth(valid_token, { type: "bearer" })
       .query({ fields: ["username"], value: "users[0].username" })
       .end((err, res) => {
-        res.should.have.status(404);
+        expect(res).to.have.status(404);
         done();
       });
   });
@@ -312,7 +309,7 @@ describe("GET - /user", () => {
       .get("/user")
       .query({ fields: ["username"], value: users[0].username })
       .end((err, res) => {
-        res.should.have.status(401);
+        expect(res).to.have.status(401);
         done();
       });
   });
@@ -326,7 +323,7 @@ describe("GET - /users", () => {
       .auth(valid_token, { type: "bearer" })
       .query({ id: _.map(users, "_id") })
       .end((err, res) => {
-        res.should.have.status(200);
+        expect(res).to.have.status(200);
         expect(res.body).to.be.an("array");
         done();
       });
@@ -339,7 +336,7 @@ describe("GET - /users", () => {
       .auth(valid_token, { type: "bearer" })
       .query({ id: ["66791a552b38d88d8c6e9ee7", "66791a822b38d88d8c6e9eed"] })
       .end((err, res) => {
-        res.should.have.status(404);
+        expect(res).to.have.status(404);
         done();
       });
   });
@@ -351,7 +348,7 @@ describe("GET - /users", () => {
       .auth(valid_token, { type: "bearer" })
       .query({ id: ["123", "456"] })
       .end((err, res) => {
-        res.should.have.status(405);
+        expect(res).to.have.status(405);
         done();
       });
   });
@@ -362,7 +359,7 @@ describe("GET - /users", () => {
       .get("/users")
       .query({ id: _.map(users, "_id") })
       .end((err, res) => {
-        res.should.have.status(401);
+        expect(res).to.have.status(401);
         done();
       });
   });
@@ -376,7 +373,7 @@ describe("GET - /users_by_filters", () => {
       .auth(valid_token, { type: "bearer" })
       .query({ page: 1, pageSize: 2 })
       .end((err, res) => {
-        res.should.have.status(200);
+        expect(res).to.have.status(200);
         expect(res.body.results).to.be.an("array");
         done();
       });
@@ -399,7 +396,7 @@ describe("GET - /users_by_filters", () => {
       .auth(valid_token, { type: "bearer" })
       .query({ page: 1, pageSize: 2, q: "Lu" })
       .end((err, res) => {
-        res.should.have.status(200);
+        expect(res).to.have.status(200);
         expect(res.body.results).to.be.an("array");
         expect(res.body.count).to.be.equal(2);
         done();
@@ -412,7 +409,7 @@ describe("GET - /users_by_filters", () => {
       .auth(valid_token, { type: "bearer" })
       .query({ page: "une phrase", pageSize: 2 })
       .end((err, res) => {
-        res.should.have.status(405);
+        expect(res).to.have.status(405);
         done();
       });
   });
@@ -422,7 +419,7 @@ describe("GET - /users_by_filters", () => {
       .get("/users_by_filters")
       .query({ page: 1, pageSize: 2 })
       .end((err, res) => {
-        res.should.have.status(401);
+        expect(res).to.have.status(401);
         done();
       });
   });
@@ -436,7 +433,7 @@ describe("PUT - /user", () => {
       .auth(valid_token, { type: "bearer" })
       .send({ username: "Olivier" })
       .end((err, res) => {
-        res.should.have.status(200);
+        expect(res).to.have.status(200);
         done();
       });
   });
@@ -448,7 +445,7 @@ describe("PUT - /user", () => {
       .auth(valid_token, { type: "bearer" })
       .send({ username: "Olivier", bio: "Edouard" })
       .end((err, res) => {
-        res.should.have.status(405);
+        expect(res).to.have.status(405);
         done();
       });
   });
@@ -460,7 +457,7 @@ describe("PUT - /user", () => {
       .auth(valid_token, { type: "bearer" })
       .send({ username: "Olivier", bio: "Edouard" })
       .end((err, res) => {
-        res.should.have.status(404);
+        expect(res).to.have.status(404);
         done();
       });
   });
@@ -472,7 +469,7 @@ describe("PUT - /user", () => {
       .auth(valid_token, { type: "bearer" })
       .send({ username: "", bio: "Edouard" })
       .end((err, res) => {
-        res.should.have.status(405);
+        expect(res).to.have.status(405);
         done();
       });
   });
@@ -484,7 +481,7 @@ describe("PUT - /user", () => {
       .auth(valid_token, { type: "bearer" })
       .send({ username: users[1].username })
       .end((err, res) => {
-        res.should.have.status(405);
+        expect(res).to.have.status(405);
         done();
       });
   });
@@ -495,7 +492,7 @@ describe("PUT - /user", () => {
       .put("/user/" + users[0]._id)
       .send({ username: "Olivier" })
       .end((err, res) => {
-        res.should.have.status(401);
+        expect(res).to.have.status(401);
         done();
       });
   });
@@ -510,7 +507,7 @@ describe("PUT - /users", () => {
       .query({ id: _.map(users, "_id") })
       .send({ bio: "Ceci est une bio test" })
       .end((err, res) => {
-        res.should.have.status(200);
+        expect(res).to.have.status(200);
         done();
       });
   });
@@ -523,7 +520,7 @@ describe("PUT - /users", () => {
       .query({ id: ["267428142", "41452828"] })
       .send({ username: "Olivier" })
       .end((err, res) => {
-        res.should.have.status(405);
+        expect(res).to.have.status(405);
         done();
       });
   });
@@ -536,7 +533,7 @@ describe("PUT - /users", () => {
       .query({ id: ["66791a552b38d88d8c6e9ee7", "667980886db560087464d3a7"] })
       .send({ username: "Olivier" })
       .end((err, res) => {
-        res.should.have.status(404);
+        expect(res).to.have.status(404);
         done();
       });
   });
@@ -549,7 +546,7 @@ describe("PUT - /users", () => {
       .query({ id: _.map(users, "_id") })
       .send({ username: "" })
       .end((err, res) => {
-        res.should.have.status(405);
+        expect(res).to.have.status(405);
         done();
       });
   });
@@ -562,7 +559,7 @@ describe("PUT - /users", () => {
       .query({ id: _.map(users, "_id") })
       .send({ username: users[1].username })
       .end((err, res) => {
-        res.should.have.status(405);
+        expect(res).to.have.status(405);
         done();
       });
   });
@@ -574,7 +571,7 @@ describe("PUT - /users", () => {
       .query({ id: _.map(users, "_id") })
       .send({ username: "lucas" })
       .end((err, res) => {
-        res.should.have.status(401);
+        expect(res).to.have.status(401);
         done();
       });
   });
@@ -587,7 +584,7 @@ describe("DELETE - /user", () => {
       .delete("/user/665f18739d3e172be5daf092")
       .auth(valid_token, { type: "bearer" })
       .end((err, res) => {
-        res.should.have.status(404);
+        expect(res).to.have.status(404);
         done();
       });
   });
@@ -597,7 +594,7 @@ describe("DELETE - /user", () => {
       .delete("/user/123")
       .auth(valid_token, { type: "bearer" })
       .end((err, res) => {
-        res.should.have.status(405);
+        expect(res).to.have.status(405);
         done();
       });
   });
@@ -607,7 +604,7 @@ describe("DELETE - /user", () => {
       .delete("/user/" + users[1]._id)
       .auth(valid_token, { type: "bearer" })
       .end((err, res) => {
-        res.should.have.status(200);
+        expect(res).to.have.status(200);
         done();
       });
   });
@@ -620,7 +617,7 @@ describe("DELETE - /users", () => {
       .delete("/users/665f18739d3e172be5daf092&665f18739d3e172be5daf093")
       .auth(valid_token, { type: "bearer" })
       .end((err, res) => {
-        res.should.have.status(404);
+        expect(res).to.have.status(404);
         done();
       });
   });
@@ -631,7 +628,7 @@ describe("DELETE - /users", () => {
       .query({ id: ["123", "456"] })
       .auth(valid_token, { type: "bearer" })
       .end((err, res) => {
-        res.should.have.status(405);
+        expect(res).to.have.status(405);
         done();
       });
   });
@@ -642,7 +639,7 @@ describe("DELETE - /users", () => {
       .query({ id: _.map(users, "_id") })
       .auth(valid_token, { type: "bearer" })
       .end((err, res) => {
-        res.should.have.status(200);
+        expect(res).to.have.status(200);
         done();
       });
   });

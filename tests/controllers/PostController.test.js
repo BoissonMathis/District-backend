@@ -219,7 +219,7 @@ describe("GET - /post/:id", () => {
       .get("/post/" + posts[0]._id)
       .auth(valid_token, { type: "bearer" })
       .end((err, res) => {
-        res.should.have.status(200);
+        expect(res).to.have.status(200);
         done();
       });
   });
@@ -230,7 +230,7 @@ describe("GET - /post/:id", () => {
       .get("/post/665f18739d3e172be5daf092")
       .auth(valid_token, { type: "bearer" })
       .end((err, res) => {
-        res.should.have.status(404);
+        expect(res).to.have.status(404);
         done();
       });
   });
@@ -241,7 +241,7 @@ describe("GET - /post/:id", () => {
       .get("/post/123")
       .auth(valid_token, { type: "bearer" })
       .end((err, res) => {
-        res.should.have.status(405);
+        expect(res).to.have.status(405);
         done();
       });
   });
@@ -251,7 +251,7 @@ describe("GET - /post/:id", () => {
       .request(server)
       .get("/post/" + posts[0]._id)
       .end((err, res) => {
-        res.should.have.status(401);
+        expect(res).to.have.status(401);
         done();
       });
   });
@@ -265,7 +265,7 @@ describe("GET - /posts", () => {
       .auth(valid_token, { type: "bearer" })
       .query({ id: _.map(posts, "_id") })
       .end((err, res) => {
-        res.should.have.status(200);
+        expect(res).to.have.status(200);
         expect(res.body).to.be.an("array");
         done();
       });
@@ -278,7 +278,7 @@ describe("GET - /posts", () => {
       .auth(valid_token, { type: "bearer" })
       .query({ id: ["66791a552b38d88d8c6e9ee7", "66791a822b38d88d8c6e9eed"] })
       .end((err, res) => {
-        res.should.have.status(404);
+        expect(res).to.have.status(404);
         done();
       });
   });
@@ -290,7 +290,7 @@ describe("GET - /posts", () => {
       .auth(valid_token, { type: "bearer" })
       .query({ id: ["123", "456"] })
       .end((err, res) => {
-        res.should.have.status(405);
+        expect(res).to.have.status(405);
         done();
       });
   });
@@ -301,7 +301,7 @@ describe("GET - /posts", () => {
       .get("/posts")
       .query({ id: _.map(posts, "_id") })
       .end((err, res) => {
-        res.should.have.status(401);
+        expect(res).to.have.status(401);
         done();
       });
   });
@@ -315,7 +315,7 @@ describe("PUT - /post", () => {
       .auth(valid_token, { type: "bearer" })
       .send({ contentText: "Nouveau text" })
       .end((err, res) => {
-        res.should.have.status(200);
+        expect(res).to.have.status(200);
         done();
       });
   });
@@ -327,7 +327,7 @@ describe("PUT - /post", () => {
       .auth(valid_token, { type: "bearer" })
       .send({ contentText: "Nouveau text" })
       .end((err, res) => {
-        res.should.have.status(405);
+        expect(res).to.have.status(405);
         done();
       });
   });
@@ -339,7 +339,7 @@ describe("PUT - /post", () => {
       .auth(valid_token, { type: "bearer" })
       .send({ contentText: "Nouveau text" })
       .end((err, res) => {
-        res.should.have.status(404);
+        expect(res).to.have.status(404);
         done();
       });
   });
@@ -351,7 +351,7 @@ describe("PUT - /post", () => {
       .auth(valid_token, { type: "bearer" })
       .send({ contentText: "" })
       .end((err, res) => {
-        res.should.have.status(405);
+        expect(res).to.have.status(405);
         done();
       });
   });
@@ -362,7 +362,7 @@ describe("PUT - /post", () => {
       .put("/post/" + posts[0]._id)
       .send({ contentText: "Nouveau text" })
       .end((err, res) => {
-        res.should.have.status(401);
+        expect(res).to.have.status(401);
         done();
       });
   });
@@ -377,7 +377,7 @@ describe("PUT - /posts", () => {
       .query({ id: _.map(posts, "_id") })
       .send({ contentText: "Nouveau text sur plusieurs posts" })
       .end((err, res) => {
-        res.should.have.status(200);
+        expect(res).to.have.status(200);
         done();
       });
   });
@@ -390,7 +390,7 @@ describe("PUT - /posts", () => {
       .query({ id: ["267428142", "41452828"] })
       .send({ contentText: "Nouveau text sur plusieurs posts" })
       .end((err, res) => {
-        res.should.have.status(405);
+        expect(res).to.have.status(405);
         done();
       });
   });
@@ -403,7 +403,7 @@ describe("PUT - /posts", () => {
       .query({ id: ["66791a552b38d88d8c6e9ee7", "667980886db560087464d3a7"] })
       .send({ contentText: "Nouveau text sur plusieurs posts" })
       .end((err, res) => {
-        res.should.have.status(404);
+        expect(res).to.have.status(404);
         done();
       });
   });
@@ -416,7 +416,7 @@ describe("PUT - /posts", () => {
       .query({ id: _.map(posts, "_id") })
       .send({ contentText: "" })
       .end((err, res) => {
-        res.should.have.status(405);
+        expect(res).to.have.status(405);
         done();
       });
   });
@@ -428,7 +428,7 @@ describe("PUT - /posts", () => {
       .query({ id: _.map(posts, "_id") })
       .send({ contentText: "Nouveau text sur plusieurs posts" })
       .end((err, res) => {
-        res.should.have.status(401);
+        expect(res).to.have.status(401);
         done();
       });
   });
@@ -441,7 +441,7 @@ describe("DELETE - /post", () => {
       .delete("/post/" + posts[0]._id)
       .auth(valid_token, { type: "bearer" })
       .end((err, res) => {
-        res.should.have.status(200);
+        expect(res).to.have.status(200);
         done();
       });
   });
@@ -452,7 +452,7 @@ describe("DELETE - /post", () => {
       .delete("/post/665f18739d3e172be5daf092")
       .auth(valid_token, { type: "bearer" })
       .end((err, res) => {
-        res.should.have.status(404);
+        expect(res).to.have.status(404);
         done();
       });
   });
@@ -463,7 +463,7 @@ describe("DELETE - /post", () => {
       .delete("/post/123")
       .auth(valid_token, { type: "bearer" })
       .end((err, res) => {
-        res.should.have.status(405);
+        expect(res).to.have.status(405);
         done();
       });
   });
@@ -473,7 +473,7 @@ describe("DELETE - /post", () => {
       .request(server)
       .delete("/post/" + posts[0]._id)
       .end((err, res) => {
-        res.should.have.status(401);
+        expect(res).to.have.status(401);
         done();
       });
   });
@@ -486,7 +486,7 @@ describe("DELETE - /posts", () => {
       .delete("/posts/665f18739d3e172be5daf092&665f18739d3e172be5daf093")
       .auth(valid_token, { type: "bearer" })
       .end((err, res) => {
-        res.should.have.status(404);
+        expect(res).to.have.status(404);
         done();
       });
   });
@@ -498,7 +498,7 @@ describe("DELETE - /posts", () => {
       .query({ id: ["123", "456"] })
       .auth(valid_token, { type: "bearer" })
       .end((err, res) => {
-        res.should.have.status(405);
+        expect(res).to.have.status(405);
         done();
       });
   });
@@ -509,7 +509,7 @@ describe("DELETE - /posts", () => {
       .delete("/posts")
       .query({ id: _.map(posts, "_id") })
       .end((err, res) => {
-        res.should.have.status(401);
+        expect(res).to.have.status(401);
         done();
       });
   });
@@ -521,7 +521,7 @@ describe("DELETE - /posts", () => {
       .auth(valid_token, { type: "bearer" })
       .query({ id: _.map(posts, "_id") })
       .end((err, res) => {
-        res.should.have.status(200);
+        expect(res).to.have.status(200);
         done();
       });
   });
